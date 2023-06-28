@@ -45,6 +45,28 @@ async function getMealItems() {
     }
 }
 
+async function getOrderByMemberId(id) {
+    const isnum = true // /^\d+$/.test(id);
+    if (isnum) {
+        try {
+            const connection = await mysql.createConnection(dbUrl);
+            const [row] = await connection.query(
+            `SELECT * FROM orders o
+            INNER JOIN order_details od ON od.order_id = o.id
+            INNER JOIN meal_items mi on mi.id = od.meal_item_id
+            WHERE cobot_member_id ="${id}"`);
+            connection.end();
+            return row;
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+    else {
+        return [];
+    }
+}
+
 // Endpoint to get the list of restaurants
 app.get('/meals', async (req, res) => {
     console.log("get meals")
@@ -53,10 +75,10 @@ app.get('/meals', async (req, res) => {
 
 });
 
-app.get('/meals/:id', async function (req, res) {
+app.get('/meals/member/:id', async function (req, res) {
     console.log(req.params)
     console.log("--------------")
-    const meals = await getMealItems(req.params.id);
+    const meals = await  getOrderByMemberId(req.params.id);
     res.send(meals);
 })
 
