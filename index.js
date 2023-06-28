@@ -33,7 +33,7 @@ async function getMealItems() {
     console.log("outer getMealsItems")
     try {
         console.log("try conn")
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await mysql.createConnection(dbUrl);
         console.log("connected")
         const [rows] = await connection.query('SELECT * FROM meal_items');
         connection.end();
