@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"></script>
+</head>
+<body>
+<h2>Menu</h2>
+<div 
+    x-data="app()"
+    x-init="fetchItems()"
+>
+    <template x-for="(item, index) in items" :key="index">
+        <div>
+            <span x-text="item.item_name"></span> -
+            <span x-text="item.item_description"></span>
+            <span x-text="item.price + 'CHF'"></span>
+            <button @click="addToBasket(item)">Add</button>
+        </div>
+    </template>
+    <h2>Basket</h2>
+    <template x-for="(item, index) in basket" :key="index">
+        <div>
+            <span x-text="item"></span>
+            <button @click="removeFromBasket(index)">Remove from basket</button>
+        </div>
+    </template>
+    <button @click="confirmBasket()">Confirm</button>
+</div>
+<script>
+function app() {
+    return {
+        route: "https://cobot-bot-workhub-b4b7ac000c0c.herokuapp.com",
+        items: [],
+        basket: [],
+        async fetchItems() {
+            this.items = await this.getRoute('/meals');
+        },
+        async getRoute(endRoute) {
+            try {
+                const response = await fetch(this.route + endRoute);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                throw error;
+            }
+        },
+        addToBasket(item) {
+            this.basket.push(item);
+            console.log(Array.from(this.basket));
+        },
+        removeFromBasket(index) {
+            this.basket.splice(index, 1);
+        },
+        confirmBasket() {
+            console.log(this.basket);
+        }
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+
+@import "cobot_assets/font_awesome_imports";
+@import "cobot_assets/imports";
+
+table.product-table {
+    width: 100%;
+    max-width: 700px;
+}
+th,td {
+    padding: 3px;
+}
+td.separator {
+    height: 16px;
+}
+td.product-name, th.product-name {
+    text-align: left;
+}
+td, th {
+    text-align: right;
+}
