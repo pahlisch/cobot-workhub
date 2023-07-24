@@ -74,8 +74,6 @@ async function getOrderByMemberIdAndDate(id, date) {
             const connection = await mysql.createConnection(dbUrl);
             const [row] = await connection.query(
             `SELECT * FROM orders o
-            INNER JOIN order_details od ON od.order_id = o.id
-            INNER JOIN meal_items mi on mi.id = od.meal_item_id
             WHERE cobot_member_id ="${id}"
             AND order_date = "${date}"`);
             connection.end();
