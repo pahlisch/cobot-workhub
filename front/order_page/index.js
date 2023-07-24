@@ -49,7 +49,7 @@ function app() {
         confirmBasket() {
             console.log("click")
             console.log(Array.from(this.basket));
-            this.postRoute("/insert/order", this.basket)
+            this.postRoute("/order/insert", this.basket)
         },
         returnTotalBasketAmount() {
             let total = 0;

@@ -10,10 +10,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
+const corsOptions = {
+    origin: 'null', 
+    optionsSuccessStatus: 200
+};
 
 // Initialize the express app
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Database connection
