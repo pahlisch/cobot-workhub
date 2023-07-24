@@ -136,6 +136,10 @@ app.get('/meals/member/:id', async function (req, res) {
     res.send(meals);
 })
 
+app.post('/post/test', async function (req, res) {
+    console.log("post route called")
+})
+
 app.post('/order/insert', async function (req, res) {
     console.log("post route called")
     try {
@@ -158,7 +162,7 @@ app.post('/order/insert', async function (req, res) {
         console.error("Error processing order:", error);
         res.status(500).send('Error processing order');
     }
-});
+})
 
 // Use the environment variable PORT or default to 8080
 const port = process.env.PORT || 8080;
