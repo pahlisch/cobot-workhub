@@ -11,7 +11,7 @@ const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
 const corsOptions = {
-    origin: 'https://piloshun.cobot.me/', 
+    origin: 'https://piloshun.cobot.me/*', 
     optionsSuccessStatus: 200
 };
 
