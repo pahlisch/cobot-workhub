@@ -118,7 +118,7 @@ async function insertOrderDetails(order_id, req) {
     const meal_items = req.body.meal_items;
     let sql = `INSERT INTO order_details (order_id, order_date) VALUES `;
     for (let i = 0; i < meal_items.length; i++) {
-        sql = sql + `(${order_id}, ?)`
+        sql = sql + "(" + order_id + ", ?)"
     }
     try {
         const connection = await mysql.createConnection(dbUrl);
