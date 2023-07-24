@@ -18,6 +18,27 @@ function app() {
                 throw error;
             }
         },
+        async postRoute(endRoute, postData) {
+            try {
+                const response = await fetch(this.route + endRoute, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                } 
+        
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Error posting data:", error);
+                throw error;
+            }
+        },
         addToBasket(item) {
             this.basket.push(item);
             console.log(Array.from(this.basket));
@@ -26,7 +47,9 @@ function app() {
             this.basket.splice(index, 1);
         },
         confirmBasket() {
-            console.log(this.basket);
+            console.log("click")
+            console.log(Array.from(this.basket));
+            this.postRoute("/insert/order", this.basket)
         },
         returnTotalBasketAmount() {
             let total = 0;

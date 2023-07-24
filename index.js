@@ -118,7 +118,6 @@ async function insertOrder(req) {
 async function insertOrderDetails(order_id, req) {
     console.log(req.body)
     
-
 }
 
 
@@ -138,20 +137,28 @@ app.get('/meals/member/:id', async function (req, res) {
 })
 
 app.post('/order/insert', async function (req, res) {
-    
+    console.log("post route called")
+    try {
+       
+        let cobot_member_id = req.body.cobot_member_id; 
+        let order_date = req.body.order_date; 
+        let existing_order = await getOrderByMemberIdAndDate(cobot_member_id, order_date);
+        console.log(existing_order);
 
-    let existing_order = getOrderByMemberIdAndDate(cobot_member_id, order_date);
-    console.log(existing_order);
+        if (existing_order.length === 0) {
+            await insertOrder(req); 
+            existing_order = await getOrderByMemberIdAndDate(cobot_member_id, order_date);
+        }
 
-    if (existing_order == []) {
-        insertOrder(req);
-        existing_order = getOrderByMemberIdAndDate(id, date);
+        await insertOrderDetails(existing_order.id, req.body.orderDetails); 
+
+        res.status(200).send('Order and Order Details inserted successfully');
+
+    } catch (error) {
+        console.error("Error processing order:", error);
+        res.status(500).send('Error processing order');
     }
-
-    insertOrderDetails(existing_order.id, req);
-
 });
-
 
 // Use the environment variable PORT or default to 8080
 const port = process.env.PORT || 8080;
