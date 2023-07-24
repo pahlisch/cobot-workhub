@@ -67,6 +67,61 @@ async function getOrderByMemberId(id) {
     }
 }
 
+async function getOrderByMemberIdAndDate(id, date) {
+    const isnum = true // /^\d+$/.test(id);
+    if (isnum) {
+        try {
+            const connection = await mysql.createConnection(dbUrl);
+            const [row] = await connection.query(
+            `SELECT * FROM orders o
+            INNER JOIN order_details od ON od.order_id = o.id
+            INNER JOIN meal_items mi on mi.id = od.meal_item_id
+            WHERE cobot_member_id ="${id}"
+            AND order_date = "${date}"`);
+            connection.end();
+            return row;
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+    else {
+        return [];
+    }
+}
+
+async function insertOrder(req) {
+    console.log(req.body)
+    const cobot_member_id = req.body.cobot_member_id;
+    const order_date = req.body.order_date;
+
+    const sql = `INSERT INTO orders (cobot_member_id, order_date) VALUES (?, ?)`;
+    const values = [cobot_member_id, order_date];
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        console.log("connected")
+        
+        connection.query(sql, values, (err, result) => {
+            if (err) {
+            res.send(err);
+            } else {
+            res.send({ message: 'Order inserted successfully' });
+            }})
+        connection.end();
+
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+async function insertOrderDetails(order_id, req) {
+    console.log(req.body)
+    
+
+}
+
+
 // Endpoint to get the list of restaurants
 app.get('/meals', async (req, res) => {
     console.log("get meals")
@@ -81,6 +136,22 @@ app.get('/meals/member/:id', async function (req, res) {
     const meals = await  getOrderByMemberId(req.params.id);
     res.send(meals);
 })
+
+app.post('/order/insert', async function (req, res) {
+    
+
+    let existing_order = getOrderByMemberIdAndDate(cobot_member_id, order_date);
+    console.log(existing_order);
+
+    if (existing_order == []) {
+        insertOrder(req);
+        existing_order = getOrderByMemberIdAndDate(id, date);
+    }
+
+    insertOrderDetails(existing_order.id, req);
+
+});
+
 
 // Use the environment variable PORT or default to 8080
 const port = process.env.PORT || 8080;

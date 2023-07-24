@@ -4,6 +4,7 @@ function app() {
         date: new Date().toJSON().slice(0, 10),
         items: [],
         basket: [],
+        cur: ' CHF',
         async fetchItems() {
             this.items = await this.getRoute('/meals');
         },
@@ -33,9 +34,6 @@ function app() {
                 total = total + this.basket[i].price;
             }
             return total;
-        },
-        dateChanged() {
-            console.log(this.date); 
         }
     }
 }

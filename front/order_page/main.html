@@ -5,17 +5,19 @@
     <script src="index.js"></script>
 </head>
 <body>
-    <input type="date" x-model="date"  x-on:change="dateChanged()"/>
-<h2>Menu</h2>
-<div 
+    <div 
     x-data="app()"
     x-init="fetchItems()"
->
+    >
+    <input type="date" x-model="date"  x-on:change="console.log(date)"/>
+<h2>Menu</h2>
+
+
     <template x-for="(item, index) in items" :key="index">
         <div>
             <span x-text="item.item_name"></span> -
             <span x-text="item.item_description"></span>
-            <span x-text="item.price + 'CHF'"></span>
+            <span x-text="item.price + cur"></span>
             <button @click="addToBasket(item)">Add</button>
         </div>
     </template>
@@ -23,10 +25,10 @@
     <template x-for="(item, index) in basket" :key="index">
         <div>
             <span x-text="item.item_name"></span>
-            <span x-text="item.price + 'CHF'"></span>
+            <span x-text="item.price + cur"></span>
             <button @click="removeFromBasket(index)">Remove from basket</button>
         </div>
     </template>
-    <div>Total: <span x-text="returnTotalBasketAmount()"></span></div>
+    <div>Total: <span x-text="returnTotalBasketAmount() + cur"></span></div>
     <button @click="confirmBasket()">Confirm</button>
 </div>
