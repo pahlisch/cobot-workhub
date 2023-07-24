@@ -114,7 +114,28 @@ async function insertOrder(req) {
 }
 
 async function insertOrderDetails(order_id, req) {
-    console.log("order_details to do")
+
+    const meal_items = req.body.meal_items;
+    let sql = `INSERT INTO order_details (order_id, order_date) VALUES `;
+    for (let i = 0; i < meal_items.length; i++) {
+        sql = sql + `(${order_id}, ?)`
+    }
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        console.log("connected")
+        
+        connection.query(sql, meal_items, (err, result) => {
+            if (err) {
+            res.send(err);
+            } else {
+            res.send({ message: 'OrderDetails inserted successfully' });
+            }})
+        connection.end();
+
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
     
 }
 
@@ -150,7 +171,7 @@ app.post('/order/insert', async function (req, res) {
             existing_order = await getOrderByMemberIdAndDate(cobot_member_id, order_date);
         }
 
-        await insertOrderDetails(existing_order.id, req.body.orderDetails); 
+        await insertOrderDetails(existing_order.id, req); 
 
         res.status(200).send('Order and Order Details inserted successfully');
 
