@@ -11,13 +11,13 @@ const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
 const corsOptions = {
-    origin: 'null', 
+    origin: 'https://bots.apps.cobot.me/', 
     optionsSuccessStatus: 200
 };
 
 // Initialize the express app
 const app = express();
-//app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Database connection
