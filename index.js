@@ -67,6 +67,7 @@ async function getOrderByMemberId(id) {
     }
 }
 
+
 async function getOrderByMemberIdAndDate(id, date) {
     const isnum = true // /^\d+$/.test(id);
     if (isnum) {
@@ -170,8 +171,10 @@ app.post('/order/insert', async function (req, res) {
             await insertOrder(req); 
             existing_order = await getOrderByMemberIdAndDate(cobot_member_id, order_date);
         }
-
-        await insertOrderDetails(existing_order.id, req); 
+        if ( existing_order.length !== 0) {
+            let order_id = order[0].id
+        }
+        await insertOrderDetails(order_id, req); 
 
         res.status(200).send('Order and Order Details inserted successfully');
 
