@@ -10,8 +10,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
+const whitelist = ['https://piloshun.cobot.me'];
+
 const corsOptions = {
-    origin: 'https://piloshun.cobot.me/*', 
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     optionsSuccessStatus: 200
 };
 
