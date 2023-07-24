@@ -116,7 +116,7 @@ async function insertOrder(req) {
 }
 
 async function insertOrderDetails(order_id, req) {
-    console.log(req.body)
+    console.log("order_details to do")
     
 }
 
