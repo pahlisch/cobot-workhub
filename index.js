@@ -136,13 +136,11 @@ app.get('/meals/member/:id', async function (req, res) {
     res.send(meals);
 })
 
-app.post('/post/test', async function (req, res) {
-    console.log("post route called")
-    res.status(200).send('test successful');
-})
+
 
 app.post('/order/insert', async function (req, res) {
     console.log("post route called")
+    res.status(200).send('test successful');
     try {
        
         let cobot_member_id = req.body.cobot_member_id; 
