@@ -15,6 +15,7 @@
 
     <template x-for="(item, index) in items" :key="index">
         <div>
+            <span x-text="item.id"></span>
             <span x-text="item.item_name"></span> -
             <span x-text="item.item_description"></span>
             <span x-text="item.price + cur"></span>

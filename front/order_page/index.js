@@ -31,9 +31,8 @@ function app() {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 } 
-        
-                const data = await response.json();
-                return data;
+                console.log(response)
+
             } catch (error) {
                 console.error("Error posting data:", error);
                 throw error;
@@ -49,7 +48,16 @@ function app() {
         confirmBasket() {
             console.log("click")
             console.log(Array.from(this.basket));
-            this.postRoute("/order/insert", [])
+            let meal_ids = [];
+            for (let i=0; i < this.basket.length; i++) {
+                meal_ids.push(this.basket[i].id)
+            }
+            let post_data = {
+                "cobot_member_id": 22,
+                "order_date": this.date,
+                "meal_items": meal_ids
+            }
+            this.postRoute("/order/insert", post_data)
         },
         returnTotalBasketAmount() {
             let total = 0;

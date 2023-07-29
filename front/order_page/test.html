@@ -11,6 +11,7 @@
         <template x-for="(item, index) in items" :key="index">
             <div class="menu-item">
                 <div class="menu-item-description">
+                    <span x-text="item.id" style="display: none;"></span>
                     <span x-text="item.item_name"></span> -
                     <span x-text="item.item_description"></span>
                 </div>
