@@ -117,7 +117,7 @@ async function insertOrder(req) {
 async function insertOrderDetails(order_id, req) {
 
     const meal_items = req.body.meal_items;
-    let sql = `INSERT INTO order_details (order_id, order_date) VALUES `;
+    let sql = `INSERT INTO order_details (order_id, meal_item_id) VALUES `;
     for (let i = 0; i < meal_items.length; i++) {
         sql = sql + "(" + order_id + ", ?)"
         if (i == meal_items.length -1) {
