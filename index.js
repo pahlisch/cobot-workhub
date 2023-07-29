@@ -171,9 +171,11 @@ app.post('/order/insert', async function (req, res) {
             await insertOrder(req); 
             existing_order = await getOrderByMemberIdAndDate(cobot_member_id, order_date);
         }
+
+        let order_id;
         if (existing_order.length !== 0) {
-            let order_id = existing_order[0].id;
-            console.log(order_id)
+            order_id = existing_order[0].id;
+            
         }
         await insertOrderDetails(order_id, req); 
 
