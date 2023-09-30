@@ -7,6 +7,8 @@ function app() {
         cur: ' CHF',
         async fetchItems() {
             this.items = await this.getRoute('/meals');
+            this.future_order = await this.getRoute('/orders/22');
+            console.log(future_order)
         },
         async getRoute(endRoute) {
             try {

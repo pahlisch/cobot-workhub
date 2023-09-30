@@ -45,6 +45,21 @@ async function getMealItems() {
     }
 }
 
+async function getDateWithOrdersByMemberId(cobot_member_id) {
+    console.log("getdateWithOrders")
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        console.log("connected")
+        const [rows] = await connection.query('SELECT DATE(created_at) FROM orders WHERE cobot_member_id = ? and DATE_created_at >= CURRENT_DATE');
+        connection.end();
+        console.log(rows)
+        return rows;
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
 async function getOrderByMemberId(id) {
     const isnum = true // /^\d+$/.test(id);
     if (isnum) {
@@ -165,6 +180,14 @@ app.get('/meals', async (req, res) => {
     res.send(meals);
 
 });
+
+app.get('/orders/:id', async (req, res) => {
+    console.log("get orders")
+    const orders = await getDateWithOrdersByMemberId(cobot_member_id);
+    res.send(orders);
+
+});
+
 
 app.get('/meals/member/:id', async function (req, res) {
     console.log(req.params)
