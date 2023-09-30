@@ -50,7 +50,7 @@ async function getDateWithOrdersByMemberId(cobot_member_id) {
     try {
         const connection = await mysql.createConnection(dbUrl);
         console.log("connected")
-        const [rows] = await connection.query(`SELECT DATE(created_at) FROM orders WHERE cobot_member_id = ${cobot_member_id} and DATE(created_at) >= CURRENT_DATE`);
+        const [rows] = await connection.query(`SELECT order_date FROM orders WHERE cobot_member_id = ${cobot_member_id} and DATE(created_at) >= CURRENT_DATE`);
         connection.end();
         console.log(rows)
         return rows;

@@ -4,11 +4,11 @@ function app() {
         date: new Date().toJSON().slice(0, 10),
         items: [],
         basket: [],
+        future_orders: [],
         cur: ' CHF',
         async fetchItems() {
             this.items = await this.getRoute('/meals');
-            this.future_order = await this.getRoute('/orders/22');
-            console.log(future_order)
+            this.future_orders = await this.getRoute('/orders/22');
         },
         async getRoute(endRoute) {
             try {

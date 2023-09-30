@@ -8,6 +8,12 @@
     <button @click="toggleDarkTheme">Toggle Dark Theme</button>
     <div class="container" x-data="app()" x-init="fetchItems()">
         <input type="date" x-model="date" x-on:change="console.log(date)" />
+        <h2>Date with orders</h2>
+        <template x-for="(date, index) in future_orders" :key="index">
+            <div>
+                <span x-text="date"></span>
+            </div>
+        </template>
         <h2>Menu</h2>
         <template x-for="(item, index) in items" :key="index">
             <div class="menu-item">
