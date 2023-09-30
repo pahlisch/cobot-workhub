@@ -220,7 +220,7 @@ app.get('/meals/member/:id', async function (req, res) {
 })
 
 app.get('/orderDetails/:member/:date', async function (req, res) {
-    console.log(getOrderDetails);
+    console.log("getOrderDetails");
     const orderDetails = await getOrderDetailsByMemberIdAndDate(req.params.member, req.params.date);
     res.send(orderDetails);
 })
