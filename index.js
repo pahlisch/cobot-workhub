@@ -134,24 +134,22 @@ async function insertOrderDetails(order_id, req, res) {
         const connection = await mysql.createConnection(dbUrl);
         console.log("connected");
 
-        // First, delete existing order details
         connection.query(deleteSql, [order_id], (err, result) => {
             if (err) {
                 res.send(err);
                 connection.end();
                 return;
-            }
+            }});
 
-            // Now, insert new order details
-            connection.query(sql, meal_items, (err, result) => {
-                if (err) {
-                    res.send(err);
-                } else {
-                    res.send({ message: 'OrderDetails inserted successfully' });
-                }
-                connection.end();
-            });
+        connection.query(sql, meal_items, (err, result) => {
+            if (err) {
+                res.send(err);
+            } else {
+                res.send({ message: 'OrderDetails inserted successfully' });
+            }
+            connection.end();
         });
+        
 
     } catch (err) {
         console.error(err);
