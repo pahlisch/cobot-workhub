@@ -104,6 +104,29 @@ async function getOrderByMemberIdAndDate(id, date) {
     }
 }
 
+async function getOrderDetailsByMemberIdAndDate(id, date) {
+    const isnum = true // /^\d+$/.test(id);
+    if (isnum) {
+        try {
+            const connection = await mysql.createConnection(dbUrl);
+            const [row] = await connection.query(
+            `SELECT mi.* FROM orders o
+            INNER JOIN order_details od ON od.order_id = o.id
+            INNER JOIN meal_items mi on mi.id = od.meal_item_id
+            WHERE cobot_member_id ="${id}"
+            AND order_date = "${date}"`);
+            connection.end();
+            return row;
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+    else {
+        return [];
+    }
+}
+
 async function insertOrder(req) {
     console.log(req.body)
     const cobot_member_id = req.body.cobot_member_id;
@@ -194,6 +217,10 @@ app.get('/meals/member/:id', async function (req, res) {
     console.log("--------------")
     const meals = await  getOrderByMemberId(req.params.id);
     res.send(meals);
+})
+
+app.get('orderDetails/:member/:date', async function (req, res) {
+    const order = await getOrderDetailsByMemberIdAndDate(req.params.member, req.params.date);
 })
 
 
