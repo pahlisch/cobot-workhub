@@ -9,7 +9,7 @@ function app() {
         async fetchItems() {
             this.items = await this.getRoute('/meals');
             this.future_orders = await this.getRoute('/orders/22');
-            this.basket = await this.getRoute('/order/22/30-09-23');
+            this.basket = await this.getRoute('/order/22/2023-09-30');
         },
         async getRoute(endRoute) {
             try {
