@@ -114,37 +114,51 @@ async function insertOrder(req) {
     }
 }
 
-async function insertOrderDetails(order_id, req) {
+async function insertOrderDetails(order_id, req, res) {
 
     const meal_items = req.body.meal_items;
+
+    let deleteSql = `DELETE FROM order_details WHERE order_id = ?`;
+
     let sql = `INSERT INTO order_details (order_id, meal_item_id) VALUES `;
     for (let i = 0; i < meal_items.length; i++) {
-        sql = sql + "(" + order_id + ", ?)"
-        if (i == meal_items.length -1) {
-            sql = sql + ';'
+        sql = sql + "(" + order_id + ", ?)";
+        if (i == meal_items.length - 1) {
+            sql = sql + ';';
         } else {
-            sql = sql + ','
+            sql = sql + ',';
         }
     }
+
     try {
         const connection = await mysql.createConnection(dbUrl);
-        console.log("connected")
-        
-        connection.query(sql, meal_items, (err, result) => {
+        console.log("connected");
+
+        // First, delete existing order details
+        connection.query(deleteSql, [order_id], (err, result) => {
             if (err) {
-            res.send(err);
-            } else {
-            res.send({ message: 'OrderDetails inserted successfully' });
-            }})
-        connection.end();
+                res.send(err);
+                connection.end();
+                return;
+            }
+
+            // Now, insert new order details
+            connection.query(sql, meal_items, (err, result) => {
+                if (err) {
+                    res.send(err);
+                } else {
+                    res.send({ message: 'OrderDetails inserted successfully' });
+                }
+                connection.end();
+            });
+        });
 
     } catch (err) {
         console.error(err);
-        return [];
+        res.send({ message: 'There was an error processing your request' });
     }
-    
-}
 
+}
 
 // Endpoint to get the list of restaurants
 app.get('/meals', async (req, res) => {

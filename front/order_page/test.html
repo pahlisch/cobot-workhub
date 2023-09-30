@@ -2,9 +2,10 @@
 <head>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"></script>
     <script src="index.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="dark.css">
 </head>
 <body>
+    <button @click="toggleDarkTheme">Toggle Dark Theme</button>
     <div class="container" x-data="app()" x-init="fetchItems()">
         <input type="date" x-model="date" x-on:change="console.log(date)" />
         <h2>Menu</h2>

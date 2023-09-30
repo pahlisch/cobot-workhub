@@ -1,0 +1,92 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.menu-item, .basket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.menu-item-description {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.menu-item-price, .basket-item-price {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.total {
+    font-weight: bold;
+    font-size: 20px;
+    margin-top: 10px;
+}
+
+button.confirm {
+    background-color: #28A745;
+}
+
+h2 {
+    font-size: 24px;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+input[type="date"] {
+    padding: 5px;
+    font-size: 16px;
+}
+
+.dark-theme {
+    background-color: #333;
+    color: #eee;
+}
+
+.dark-theme .menu-item, .dark-theme .basket-item {
+    border-color: #555;
+}
+
+.dark-theme h2 {
+    border-bottom-color: #555;
+}
+
+.dark-theme button {
+    background-color: #444;
+}
+
+.dark-theme button:hover {
+    background-color: #555;
+}
+
+.dark-theme .confirm {
+    background-color: #2B8A3E;
+}
+
+.dark-theme input[type="date"] {
+    background-color: #444;
+    border: none;
+    color: #eee;
+}

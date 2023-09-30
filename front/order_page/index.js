@@ -65,6 +65,15 @@ function app() {
                 total = total + this.basket[i].price;
             }
             return total;
+        },
+        toggleDarkTheme() {
+            this.isDarkTheme = !this.isDarkTheme;
+            const body = document.querySelector('body');
+            if (this.isDarkTheme) {
+                body.classList.add('dark-theme');
+            } else {
+                body.classList.remove('dark-theme');
+            }
         }
     }
 }
