@@ -3,6 +3,7 @@ function app() {
         route: "https://cobot-bot-workhub-b4b7ac000c0c.herokuapp.com",
         date: new Date().toJSON().slice(0, 10),
         items: [],
+        showModal: false,
         basket: [],
         future_orders: [],
         cur: ' CHF',
@@ -49,18 +50,24 @@ function app() {
             this.basket.splice(index, 1);
         },
         confirmBasket() {
-            console.log("click")
-            console.log(Array.from(this.basket));
             let meal_ids = [];
-            for (let i=0; i < this.basket.length; i++) {
-                meal_ids.push(this.basket[i].id)
+
+            if (this.basket.length === 0) {
+                this.getRoute(`/order/delete/22/${this.date}`);
+            } else {
+
+                for (let i=0; i < this.basket.length; i++) {
+                    meal_ids.push(this.basket[i].id)
+                }
+                let post_data = {
+                    "cobot_member_id": 22,
+                    "order_date": this.date,
+                    "meal_items": meal_ids
+                }
+                this.postRoute("/order/insert", post_data);
             }
-            let post_data = {
-                "cobot_member_id": 22,
-                "order_date": this.date,
-                "meal_items": meal_ids
-            }
-            this.postRoute("/order/insert", post_data)
+            this.showModal = true;
+            
         },
         returnTotalBasketAmount() {
             let total = 0;
@@ -78,7 +85,8 @@ function app() {
                 for (let i = 0; i < this.dateOrder.length; i++) { 
                     this.basket.push(this.dateOrder[i]);
                 }
-            }    
+            }
+            this.future_orders = await this.getRoute('/orders/22');    
         },
         formatDate(datetimeString) {
             return datetimeString.split('T')[0];

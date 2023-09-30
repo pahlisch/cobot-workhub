@@ -158,6 +158,36 @@ async function insertOrder(req) {
     }
 }
 
+async function deleteOrderByMemberAndDate(member_id, date) {
+
+    let deleteOrderDetail = `DELETE FROM order_details od INNER JOIN orders o ON od.order_id = o.id where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
+    let deleteOrder = `DELETE FROM orders o where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
+
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        console.log("connected")
+        
+        connection.query(deleteOrderDetail, (err, result) => {
+            if (err) {
+            res.send(err);
+            } else {
+            res.send({ message: 'Order details deleted successfully' });
+            }});
+
+        connection.query(deleteOrder, (err, result) => {
+                if (err) {
+                res.send(err);
+                } else {
+                res.send({ message: 'Order deleted successfully' });
+                }})
+        connection.end();
+
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
 async function insertOrderDetails(order_id, req, res) {
 
     const meal_items = req.body.meal_items;
@@ -224,6 +254,14 @@ app.get('/meals/member/:id', async function (req, res) {
     const meals = await  getOrderByMemberId(req.params.id);
     res.send(meals);
 })
+
+app.get('/order/delete/:member/:date', async function (req, res) {
+    console.log(req.params)
+    console.log("--------------")
+    deleteOrderByMemberAndDate(req.params.member, req.params.date);
+    
+})
+
 
 app.get('/orderDetails/:member/:date', async function (req, res) {
     console.log("getOrderDetails");
