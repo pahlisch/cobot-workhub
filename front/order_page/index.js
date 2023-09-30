@@ -9,7 +9,7 @@ function app() {
         async fetchItems() {
             this.items = await this.getRoute('/meals');
             this.future_orders = await this.getRoute('/orders/22');
-            this.basket = await this.getRoute('/order/22/2023-09-30');
+            this.basket = await this.getRoute('/orderDetails/22/2023-09-30');
         },
         async getRoute(endRoute) {
             try {
@@ -68,6 +68,20 @@ function app() {
                 total = total + this.basket[i].price;
             }
             return total;
+        },
+        async loadOrder(date) {
+            console.log(date)
+            this.basket = [];
+            this.dateOrder = await this.getRoute(`/orderDetails/22/${date}`);
+
+            if (this.dateOrder.length !== 0) {
+                for (let i = 0; i < this.dateOrder.length; i++) { 
+                    this.basket.push(this.dateOrder[i]);
+                }
+            }    
+        },
+        formatDate(datetimeString) {
+            return datetimeString.split('T')[0];
         },
         toggleDarkTheme() {
             this.isDarkTheme = !this.isDarkTheme;

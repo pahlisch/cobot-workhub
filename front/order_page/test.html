@@ -7,11 +7,17 @@
 <body>
     <button @click="toggleDarkTheme">Toggle Dark Theme</button>
     <div class="container" x-data="app()" x-init="fetchItems()">
-        <input type="date" x-model="date" x-on:change="console.log(date)" />
+        <input type="date" x-model="date" x-on:change="loadOrder(date)" />
         <h2>Date with orders</h2>
-        <template x-for="(date, index) in future_orders" :key="index">
-            <div>
-                <span x-text="date"></span>
+        <template x-for="(order, index) in future_orders" :key="index">
+            <div class="menu-item">
+                <div class="menu-item-description">
+                    <span x-text="formatDate(order.order_date)"></span>
+                    <span x-text="order.item_names"></span>
+                </div>
+                <div>
+                    <button @click="date = order.order_date; loadOrder(date)">Modify Order</button>
+                </div>
             </div>
         </template>
         <h2>Menu</h2>
@@ -30,7 +36,7 @@
                 </div>
             </div>
         </template>
-        <h2>Order for <span x-text="date"></span></h2>
+        <h2>Order for <span x-text=formatDate(date)></span></h2>
         <template x-for="(item, index) in basket" :key="index">
             <div class="basket-item">
                 <div class="menu-item-description">
