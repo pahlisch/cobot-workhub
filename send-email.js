@@ -25,7 +25,6 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-console.log(dbConfig)
 
 const dbUrl = process.env.CLEARDB_DATABASE_URL;
 
@@ -80,9 +79,6 @@ group by mi.item_name ;`);
         const htmlTable = generateHTMLTable(data);
         const csvPath = generateCSV(data);
 
-        // Here you can send `htmlTable` to your frontend or save it to a file.
-        // csvPath contains the path to your saved CSV file.
-
         return htmlTable ;
 
     } catch (err) {
@@ -108,6 +104,7 @@ smtpTransport.sendMail({
   });
 }
 
-const order_table = DayOrderTotal();
-
-sendEmail(order_table);
+(async () => {
+    const order_table = await DayOrderTotal();
+    sendEmail(order_table);
+})();

@@ -26,7 +26,6 @@ const dbConfig = {
 
 
 
-console.log(dbConfig)
 
 const dbUrl = process.env.CLEARDB_DATABASE_URL;
 
