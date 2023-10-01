@@ -30,17 +30,6 @@ console.log(dbConfig)
 
 const dbUrl = process.env.CLEARDB_DATABASE_URL;
 
-import nodemailer from 'nodemailer';
-
-const smtpTransport = nodemailer.createTransport({
-  host: process.env.MAILGUN_SMTP_SERVER,
-  port: process.env.MAILGUN_SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.MAILGUN_SMTP_LOGIN,
-    pass: process.env.MAILGUN_SMTP_PASSWORD
-  }
-});
 
 
 
