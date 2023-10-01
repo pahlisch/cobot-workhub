@@ -95,6 +95,10 @@ smtpTransport.sendMail({
     subject: 'Hello with attachment',
     text: 'Hello world',
     html: order_table,
+    attachments: [{
+        filename: 'order_totals.csv',
+        path: csvPath
+      }]
   }, (error, info) => {
     if (error) {
       console.log('Error:', error);
