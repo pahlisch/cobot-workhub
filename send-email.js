@@ -41,13 +41,67 @@ const smtpTransport = nodemailer.createTransport({
   }
 });
 
-const sendEmail = async () => {
+function generateHTMLTable(data) {
+    let table = '<table border="1">';
+    table += '<tr><th>Item Name</th><th>Count</th></tr>'; // Table headers
+
+    data.forEach(row => {
+        table += `<tr><td>${row.item_name}</td><td>${row.count}</td></tr>`;
+    });
+
+    table += '</table>';
+    return table;
+}
+
+const fs = require('fs');
+
+function generateCSV(data) {
+    let csv = 'Item Name,Count\n'; // CSV headers
+
+    data.forEach(row => {
+        csv += `${row.item_name},${row.count}\n`;
+    });
+
+    const path = './orders/order_totals.csv';
+    fs.writeFileSync(path, csv);
+
+    return path; 
+}
+
+
+async function DayOrderTotal() {
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const [data] = await connection.query(
+`select mi.item_name, count(*) as count from orders o  
+inner join order_details od on od.order_id = o.id 
+inner join meal_items mi on mi.id = od.meal_item_id 
+where o.order_date  = current_date()
+group by mi.item_name ;`);
+        connection.end();
+
+        const htmlTable = generateHTMLTable(data);
+        const csvPath = generateCSV(data);
+
+        // Here you can send `htmlTable` to your frontend or save it to a file.
+        // csvPath contains the path to your saved CSV file.
+
+        return htmlTable ;
+
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+
+const sendEmail = async (order_table) => {
 smtpTransport.sendMail({
     from: process.env.SENDER_ADDRESS,
     to: process.env.RECIPIENT,
     subject: 'Hello with attachment',
     text: 'Hello world',
-    html: '<b>Hello world</b>',
+    html: order_table,
   }, (error, info) => {
     if (error) {
       console.log('Error:', error);
@@ -59,4 +113,6 @@ smtpTransport.sendMail({
   });
 }
 
-sendEmail();
+order_table = DayOrderTotal();
+
+sendEmail(order_table);
