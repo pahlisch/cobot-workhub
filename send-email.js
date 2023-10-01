@@ -25,12 +25,9 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-
-
 console.log(dbConfig)
 
 const dbUrl = process.env.CLEARDB_DATABASE_URL;
-
 
 const smtpTransport = nodemailer.createTransport({
   host: process.env.MAILGUN_SMTP_SERVER,
@@ -113,6 +110,6 @@ smtpTransport.sendMail({
   });
 }
 
-order_table = DayOrderTotal();
+const order_table = DayOrderTotal();
 
 sendEmail(order_table);
