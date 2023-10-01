@@ -277,7 +277,7 @@ app.get('/orderDetails/:member/:date', async function (req, res) {
 
 app.get('/sendTestEmail', async function (req, res) {
 smtpTransport.sendMail({
-    from: process.env.MAILGUN_DOMAIN,
+    from: process.env.SENDER_ADDRESS,
     to: process.env.RECIPIENT,
     subject: 'Hello with attachment',
     text: 'Hello world',
