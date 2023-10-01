@@ -79,7 +79,7 @@ group by mi.item_name ;`);
         const htmlTable = generateHTMLTable(data);
         const csvPath = generateCSV(data);
 
-        return htmlTable ;
+        return { htmlTable, csvPath } ;
 
     } catch (err) {
         console.error(err);
@@ -88,7 +88,7 @@ group by mi.item_name ;`);
 }
 
 
-const sendEmail = async (order_table) => {
+const sendEmail = async (order_table, csvPath) => {
 smtpTransport.sendMail({
     from: process.env.SENDER_ADDRESS,
     to: process.env.RECIPIENT,
@@ -109,6 +109,6 @@ smtpTransport.sendMail({
 }
 
 (async () => {
-    const order_table = await DayOrderTotal();
-    sendEmail(order_table);
+    const { htmlTable, csvPath }  = await DayOrderTotal();
+    sendEmail(order_table, csvPath);
 })();
