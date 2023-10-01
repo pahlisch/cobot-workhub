@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path'
 import nodemailer from 'nodemailer';
+import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
@@ -53,7 +54,6 @@ function generateHTMLTable(data) {
     return table;
 }
 
-const fs = require('fs');
 
 function generateCSV(data) {
     let csv = 'Item Name,Count\n'; // CSV headers

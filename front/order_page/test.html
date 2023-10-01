@@ -6,7 +6,7 @@
 </head>
 <body>
     <div class="container" x-data="app({ showModal: false})" x-init="fetchItems()">
-        <input type="date" x-model="date" x-on:change="loadOrder(date)" />
+        <input type="date" placeholder="dd-mm-yyyy" x-model="date" x-on:change="loadOrder(date)" />
         <h2>Date with orders</h2>
         <template x-for="(order, index) in future_orders" :key="index">
             <div class="menu-item">
