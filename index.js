@@ -159,32 +159,24 @@ async function insertOrder(req) {
 }
 
 async function deleteOrderByMemberAndDate(member_id, date) {
-
-    let deleteOrderDetail = `DELETE od FROM order_details od INNER JOIN orders o ON od.order_id = o.id where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
-    let deleteOrder = `DELETE o FROM orders o where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
+    let deleteOrderDetail = `DELETE od FROM order_details od INNER JOIN orders o ON od.order_id = o.id WHERE o.cobot_member_id = ? AND o.order_date = ?`;
+    let deleteOrder = `DELETE FROM orders WHERE cobot_member_id = ? AND order_date = ?`;
 
     try {
         const connection = await mysql.createConnection(dbUrl);
-        console.log("connected")
-        
-        connection.query(deleteOrderDetail, (err, result) => {
-            if (err) {
-            res.send(err);
-            } else {
-            res.send({ message: 'Order details deleted successfully' });
-            }});
+        console.log("connected");
 
-        connection.query(deleteOrder, (err, result) => {
-                if (err) {
-                res.send(err);
-                } else {
-                res.send({ message: 'Order deleted successfully' });
-                }})
+
+        let resultOrderDetail = await connection.query(deleteOrderDetail, [member_id, date]);
+        let resultOrder = await connection.query(deleteOrder, [member_id, date]);
+
         connection.end();
+
+        return { messageOrderDetail: 'Order details deleted successfully', messageOrder: 'Order deleted successfully' };
 
     } catch (err) {
         console.error(err);
-        return [];
+        throw err;  
     }
 }
 

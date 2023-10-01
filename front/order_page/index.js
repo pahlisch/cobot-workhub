@@ -51,8 +51,9 @@ function app() {
         },
         confirmBasket() {
             let meal_ids = [];
-
+            
             if (this.basket.length === 0) {
+                console.log("basket empty - deleting order")
                 this.getRoute(`/order/delete/22/${this.date}`);
             } else {
 
