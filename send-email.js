@@ -102,10 +102,8 @@ smtpTransport.sendMail({
   }, (error, info) => {
     if (error) {
       console.log('Error:', error);
-      res.send(error)
     } else {
       console.log('Email sent:', info.response);
-      res.send(info.response)
     }
   });
 }
