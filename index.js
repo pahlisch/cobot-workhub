@@ -160,8 +160,8 @@ async function insertOrder(req) {
 
 async function deleteOrderByMemberAndDate(member_id, date) {
 
-    let deleteOrderDetail = `DELETE FROM order_details od INNER JOIN orders o ON od.order_id = o.id where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
-    let deleteOrder = `DELETE FROM orders o where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
+    let deleteOrderDetail = `DELETE od FROM order_details od INNER JOIN orders o ON od.order_id = o.id where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
+    let deleteOrder = `DELETE o FROM orders o where o.cobot_member_id = ${member_id} and o.order_date = ${date} `;
 
     try {
         const connection = await mysql.createConnection(dbUrl);
