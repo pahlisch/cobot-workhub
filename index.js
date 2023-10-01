@@ -4,7 +4,7 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path'
-
+import nodemailer from 'nodemailer';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
@@ -24,11 +24,26 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
+
+
 console.log(dbConfig)
 
 const dbUrl = process.env.CLEARDB_DATABASE_URL;
 
-// Function to get restaurants from the database
+import nodemailer from 'nodemailer';
+
+const smtpTransport = nodemailer.createTransport({
+  host: process.env.MAILGUN_SMTP_SERVER,
+  port: process.env.MAILGUN_SMTP_PORT,
+  secure: false,
+  auth: {
+    user: process.env.MAILGUN_SMTP_LOGIN,
+    pass: process.env.MAILGUN_SMTP_PASSWORD
+  }
+});
+
+
+
 async function getMealItems() {
     console.log("outer getMealsItems")
     try {
@@ -261,7 +276,23 @@ app.get('/orderDetails/:member/:date', async function (req, res) {
     res.send(orderDetails);
 })
 
-
+app.get('/sendTestEmail', async function (req, res) {
+smtpTransport.sendMail({
+    from: process.env.MAILGUN_DOMAIN,
+    to: process.env.RECIPIENT,
+    subject: 'Hello with attachment',
+    text: 'Hello world',
+    html: '<b>Hello world</b>',
+  }, (error, info) => {
+    if (error) {
+      console.log('Error:', error);
+      res.send(error)
+    } else {
+      console.log('Email sent:', info.response);
+      res.send(info.response)
+    }
+  });
+}
 
 app.post('/order/insert', async function (req, res) {
     console.log("post route called")

@@ -5,8 +5,7 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <button @click="toggleDarkTheme">Toggle Dark Theme</button>
-    <div class="container" x-data="app({ showModal: false, serverResponse: '' })" x-init="fetchItems()">
+    <div class="container" x-data="app({ showModal: false})" x-init="fetchItems()">
         <input type="date" x-model="date" x-on:change="loadOrder(date)" />
         <h2>Date with orders</h2>
         <template x-for="(order, index) in future_orders" :key="index">
@@ -54,7 +53,7 @@
         <button class="confirm" @click="confirmBasket()">Confirm</button>
         <div x-show="showModal" class="modal-bg">
             <div class="modal">
-                <h3>The order has been sent</h3>
+                <h3> <span x-text="modalMessage"></span></h3>
                 <button @click="showModal = false; loadOrder(date)">OK</button>
             </div>
         </div>
