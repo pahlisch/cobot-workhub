@@ -292,7 +292,7 @@ smtpTransport.sendMail({
       res.send(info.response)
     }
   });
-}
+})
 
 app.post('/order/insert', async function (req, res) {
     console.log("post route called")
