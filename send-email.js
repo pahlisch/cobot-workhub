@@ -110,5 +110,5 @@ smtpTransport.sendMail({
 
 (async () => {
     const { htmlTable, csvPath }  = await DayOrderTotal();
-    sendEmail(order_table, csvPath);
+    sendEmail(htmlTable, csvPath);
 })();
