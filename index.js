@@ -325,3 +325,47 @@ app.post('/order/insert', async function (req, res) {
 const port = process.env.PORT || 8080;
 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}/meals`));
+
+//test
+// Add a meal item
+app.post('/meal/add', async (req, res) => {
+    const { item_name, item_description, price } = req.body;
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        await connection.query('INSERT INTO meal_items (item_name, item_description, price) VALUES (?, ?, ?)', [item_name, item_description, price]);
+        connection.end();
+        res.send({ message: 'Meal item added successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error adding meal item');
+    }
+});
+
+// Update a meal item
+app.put('/meal/update/:id', async (req, res) => {
+    const { id } = req.params;
+    const { item_name, item_description, price } = req.body;
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        await connection.query('UPDATE meal_items SET item_name = ?, item_description = ?, price = ? WHERE id = ?', [item_name, item_description, price, id]);
+        connection.end();
+        res.send({ message: 'Meal item updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error updating meal item');
+    }
+});
+
+// Delete a meal item
+app.delete('/meal/delete/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        await connection.query('DELETE FROM meal_items WHERE id = ?', [id]);
+        connection.end();
+        res.send({ message: 'Meal item deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error deleting meal item');
+    }
+});

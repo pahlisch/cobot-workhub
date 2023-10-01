@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Menu</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+</head>
+
+<body>
+
+<div x-data="menuEditor()">
+    <!-- Display Menu Items -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template x-for="item in items" :key="item.id">
+                <tr>
+                    <td x-text="item.item_name"></td>
+                    <td x-text="item.item_description"></td>
+                    <td x-text="item.price"></td>
+                    <td>
+                        <button @click="startEditing(item)">Edit</button>
+                        <button @click="deleteItem(item.id)">Delete</button>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+
+    <!-- Form to Add/Edit Menu Items -->
+    <div>
+        <input type="text" x-model="currentItem.item_name" placeholder="Name">
+        <input type="text" x-model="currentItem.item_description" placeholder="Description">
+        <input type="number" step="0.01" x-model="currentItem.price" placeholder="Price">
+        <button @click="saveItem">Save</button>
+    </div>
+</div>
+
+<script>
+    function menuEditor() {
+        return {
+            items: [],
+            currentItem: {},
+            async fetchItems() {
+                let response = await fetch('/meals');
+                this.items = await response.json();
+            },
+            startEditing(item) {
+                this.currentItem = { ...item };
+            },
+            async saveItem() {
+                // If the item has an ID, update, otherwise add.
+                let endpoint = this.currentItem.id ? `/meal/update/${this.currentItem.id}` : '/meal/add';
+                let method = this.currentItem.id ? 'PUT' : 'POST';
+
+                await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.currentItem)
+                });
+
+                this.currentItem = {};
+                await this.fetchItems();
+            },
+            async deleteItem(id) {
+                await fetch(`/meal/delete/${id}`, { method: 'DELETE' });
+                await this.fetchItems();
+            },
+            init() {
+                this.fetchItems();
+            }
+        };
+    }
+</script>
+
+</body>
+</html>
