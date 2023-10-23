@@ -127,10 +127,9 @@ where o.order_date  = current_date()
 group by o.cobot_member_id, mi.item_name ;`);
         connection.end();
 
-        const htmlTable = generateHTMLTable(data);
-        const csvPath = generateCSV(data, "commande_du_jour");
+        const csvPath = generateCSV(data, "détail_commande");
 
-        return { htmlTable, csvPath } ;
+        return csvPath ;
 
     } catch (err) {
         console.error(err);
@@ -142,31 +141,38 @@ group by o.cobot_member_id, mi.item_name ;`);
 
 
 const sendEmail = async (order_table, csvPath) => {
-smtpTransport.sendMail({
-    from: process.env.SENDER_ADDRESS,
-    to: process.env.RECIPIENT,
-    subject: 'Commande du jour Workhub',
-    text: 'Veuillez trouvez les commandes du jour ci-dessous et en pièce jointe. \n En vous souhaitant une bonne journée',
-    html: order_table,
-    attachments: [{
-        filename: 'commande_du_jour.xls',
-        path: csvPath[0]
-      },
-      {
-        filename: 'détail_commande.xls',
-        path: csvPath[1]
-      }]
-  }, (error, info) => {
-    if (error) {
-      console.log('Error:', error);
-    } else {
-      console.log('Email sent:', info.response);
+    if (csvPath[0] === 'No data available' || csvPath[1] === 'No data available') {
+      console.log('No data available to send in email.');
+      return;
     }
-  });
-}
+  
+    smtpTransport.sendMail({
+      from: process.env.SENDER_ADDRESS,
+      to: process.env.RECIPIENT,
+      subject: 'Commande du jour Workhub',
+      text: 'Veuillez trouvez les commandes du jour ci-dessous et en pièce jointe. \n En vous souhaitant une bonne journée',
+      html: order_table,
+      attachments: [{
+          filename: 'commande_du_jour.csv',
+          path: csvPath[0]
+        },
+        {
+          filename: 'détail_commande.csv',
+          path: csvPath[1]
+        }]
+    }, (error, info) => {
+      if (error) {
+        console.log('Error:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+  }
+  
+  
 
 (async () => {
-    const { htmlTable, csvPath_1 }  = await DayOrderTotal();
+    const { htmlTable, csvPath }  = await DayOrderTotal();
     const csvPath_2 = await DayOrderDetails();
-    sendEmail(htmlTable, [csvPath_1, csvPath_2]);
+    sendEmail(htmlTable, [csvPath, csvPath_2]);
 })();
