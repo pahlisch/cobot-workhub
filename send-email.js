@@ -92,7 +92,6 @@ const sendEmail = async (order_table, csvPath) => {
 smtpTransport.sendMail({
     from: process.env.SENDER_ADDRESS,
     to: process.env.RECIPIENT,
-    cc: process.env.CC_RECIPIENT,
     subject: 'Hello with attachment',
     text: 'Hello world',
     html: order_table,
