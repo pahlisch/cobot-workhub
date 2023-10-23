@@ -116,6 +116,30 @@ group by mi.item_name ;`);
     }
 }
 
+async function DayOrderDetails() {
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const [data] = await connection.query(
+`select o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité from orders o  
+inner join order_details od on od.order_id = o.id 
+inner join meal_items mi on mi.id = od.meal_item_id 
+where o.order_date  = current_date()
+group by o.cobot_member_id, mi.item_name ;`);
+        connection.end();
+
+        const htmlTable = generateHTMLTable(data);
+        const csvPath = generateCSV(data, "commande_du_jour");
+
+        return { htmlTable, csvPath } ;
+
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+
+
 
 const sendEmail = async (order_table, csvPath) => {
 smtpTransport.sendMail({
@@ -125,8 +149,12 @@ smtpTransport.sendMail({
     text: 'Veuillez trouvez les commandes du jour ci-dessous et en pièce jointe. \n En vous souhaitant une bonne journée',
     html: order_table,
     attachments: [{
-        filename: 'order_totals.xls',
-        path: csvPath
+        filename: 'commande_du_jour.xls',
+        path: csvPath[0]
+      },
+      {
+        filename: 'détail_commande.xls',
+        path: csvPath[1]
       }]
   }, (error, info) => {
     if (error) {
@@ -138,6 +166,7 @@ smtpTransport.sendMail({
 }
 
 (async () => {
-    const { htmlTable, csvPath }  = await DayOrderTotal();
-    sendEmail(htmlTable, csvPath);
+    const { htmlTable, csvPath_1 }  = await DayOrderTotal();
+    const csvPath_2 = await DayOrderDetails();
+    sendEmail(htmlTable, [csvPath_1, csvPath_2]);
 })();
