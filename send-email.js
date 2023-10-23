@@ -39,11 +39,27 @@ const smtpTransport = nodemailer.createTransport({
 });
 
 function generateHTMLTable(data) {
-    let table = '<table border="1">';
-    table += '<tr><th>Item Name</th><th>Count</th></tr>'; // Table headers
+    if (!data || data.length === 0) {
+        return '<p>No data available</p>';
+    }
 
+    let table = '<table border="1">';
+
+    // Generate table headers
+    const headers = Object.keys(data[0]);
+    table += '<tr>';
+    headers.forEach(header => {
+        table += `<th>${header}</th>`;
+    });
+    table += '</tr>';
+
+    // Generate table rows
     data.forEach(row => {
-        table += `<tr><td>${row.item_name}</td><td>${row.count}</td></tr>`;
+        table += '<tr>';
+        Object.values(row).forEach(cell => {
+            table += `<td>${cell}</td>`;
+        });
+        table += '</tr>';
     });
 
     table += '</table>';
@@ -51,25 +67,38 @@ function generateHTMLTable(data) {
 }
 
 
-function generateCSV(data) {
-    let csv = 'Item Name,Count\n'; // CSV headers
 
+function generateCSV(data, filename) {
+    if (!data || data.length === 0) {
+        return 'No data available';
+    }
+
+    // Generate CSV headers
+    const headers = Object.keys(data[0]);
+    let csv = headers.join(';') + '\n';
+
+    // Generate CSV rows
     data.forEach(row => {
-        csv += `${row.item_name};${row.count}\n`;
+        const values = Object.values(row).map(value => 
+            typeof value === 'string' && value.includes(';') ? `"${value}"` : value
+        );
+        csv += values.join(';') + '\n';
     });
 
-    const path = './orders/order_totals.xls';
+    // Write CSV to file
+    const path = `./orders/${filename}.csv`;
     fs.writeFileSync(path, csv);
 
-    return path; 
+    return path;
 }
+
 
 
 async function DayOrderTotal() {
     try {
         const connection = await mysql.createConnection(dbUrl);
         const [data] = await connection.query(
-`select mi.item_name, count(*) as count from orders o  
+`select mi.item_name as plat, count(*) as quantité from orders o  
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
@@ -77,7 +106,7 @@ group by mi.item_name ;`);
         connection.end();
 
         const htmlTable = generateHTMLTable(data);
-        const csvPath = generateCSV(data);
+        const csvPath = generateCSV(data, "commande_du_jour");
 
         return { htmlTable, csvPath } ;
 
@@ -92,8 +121,8 @@ const sendEmail = async (order_table, csvPath) => {
 smtpTransport.sendMail({
     from: process.env.SENDER_ADDRESS,
     to: process.env.RECIPIENT,
-    subject: 'Hello with attachment',
-    text: 'Hello world',
+    subject: 'Commande du jour Workhub',
+    text: 'Veuillez trouvez les commandes du jour ci-dessous et en pièce jointe. \n En vous souhaitant une bonne journée',
     html: order_table,
     attachments: [{
         filename: 'order_totals.xls',
