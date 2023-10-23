@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Menu</title>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
@@ -28,30 +29,35 @@
                     <td x-text="item.item_description"></td>
                     <td x-text="item.price"></td>
                     <td>
-                        <button @click="startEditing(item)">Edit</button>
-                        <button @click="deleteItem(item.id)">Delete</button>
+                        <div class="actions">
+                            <button @click="startEditing(item)">Edit</button>
+                            <button @click="deleteItem(item.id)">Delete</button>
+                        </div>
                     </td>
+                    
                 </tr>
             </template>
+            <tr>
+                <td><input type="text" x-model="currentItem.item_name" placeholder="Name"></td>
+                <td><input type="text" x-model="currentItem.item_description" placeholder="Description"></td>
+                <td><input type="number" step="0.01" x-model="currentItem.price" placeholder="Price"></td>
+                <td><button @click="saveItem">Save</button></td>
+            </tr>
         </tbody>
     </table>
 
-    <!-- Form to Add/Edit Menu Items -->
-    <div>
-        <input type="text" x-model="currentItem.item_name" placeholder="Name">
-        <input type="text" x-model="currentItem.item_description" placeholder="Description">
-        <input type="number" step="0.01" x-model="currentItem.price" placeholder="Price">
-        <button @click="saveItem">Save</button>
-    </div>
+ 
+    
 </div>
 
 <script>
     function menuEditor() {
         return {
+            route: "https://cobot-bot-workhub-b4b7ac000c0c.herokuapp.com",
             items: [],
             currentItem: {},
             async fetchItems() {
-                let response = await fetch('/meals');
+                let response = await fetch(this.route + '/meals');
                 this.items = await response.json();
             },
             startEditing(item) {
@@ -62,7 +68,7 @@
                 let endpoint = this.currentItem.id ? `/meal/update/${this.currentItem.id}` : '/meal/add';
                 let method = this.currentItem.id ? 'PUT' : 'POST';
 
-                await fetch(endpoint, {
+                await fetch(this.route + endpoint, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(this.currentItem)
@@ -72,7 +78,7 @@
                 await this.fetchItems();
             },
             async deleteItem(id) {
-                await fetch(`/meal/delete/${id}`, { method: 'DELETE' });
+                await fetch(this.route + `/meal/delete/${id}`, { method: 'DELETE' });
                 await this.fetchItems();
             },
             init() {
