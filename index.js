@@ -237,7 +237,7 @@ async function insertOrderDetails(order_id, req, res) {
 
 }
 
-// Endpoint to get the list of restaurants
+// Endpoint to get the list of menu item
 app.get('/meals', async (req, res) => {
     console.log("get meals")
     const meals = await getMealItems();

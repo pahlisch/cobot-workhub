@@ -55,10 +55,10 @@ function generateCSV(data) {
     let csv = 'Item Name,Count\n'; // CSV headers
 
     data.forEach(row => {
-        csv += `${row.item_name},${row.count}\n`;
+        csv += `${row.item_name};${row.count}\n`;
     });
 
-    const path = './orders/order_totals.csv';
+    const path = './orders/order_totals.xls';
     fs.writeFileSync(path, csv);
 
     return path; 
@@ -92,11 +92,12 @@ const sendEmail = async (order_table, csvPath) => {
 smtpTransport.sendMail({
     from: process.env.SENDER_ADDRESS,
     to: process.env.RECIPIENT,
+    cc: process.env.CC_RECIPIENT,
     subject: 'Hello with attachment',
     text: 'Hello world',
     html: order_table,
     attachments: [{
-        filename: 'order_totals.csv',
+        filename: 'order_totals.xls',
         path: csvPath
       }]
   }, (error, info) => {
