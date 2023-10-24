@@ -11,14 +11,19 @@ function app() {
         cur: ' CHF',
         member_id: '',
         async fetchItems() {
-            this.member_id = "22"// await this.getCobot("user").id
+            this.member_id = await this.getUserId();
             this.items = await this.getRoute('/meals');
             this.future_orders = await this.getRoute(`/orders/${this.member_id}`);
             this.basket = await this.getRoute(`/orderDetails/${this.member_id}/${this.date}`);
         },
         async getRoute(endRoute) {
             try {
-                const response = await fetch(this.route + endRoute);
+                const response = await fetch(this.route + endRoute, {
+                    method: "GET",
+                    headers: {
+                      "Cache-Control": "no-cache"
+                    },
+                  });
                 const data = await response.json();
                 return data;
             } catch (error) {
@@ -28,7 +33,13 @@ function app() {
         },
         async getCobot(endRoute) {
             try {
-                const response = await fetch(this.cobot_route + endRoute);
+                const response = await fetch(this.cobot_route + endRoute, 
+                    {
+                        method: "GET",
+                        headers: {
+                          "Authorization": "Bearer " + window.cobot.access_token
+                        },
+                    });
                 const data = await response.json();
                 return data;
             } catch (error) {
@@ -36,6 +47,10 @@ function app() {
                 throw error;
             }
         },
+        async getUserId() {
+            let data = await this.getCobot("/user")
+            return data.id
+        }, 
         async postRoute(endRoute, postData) {
             try {
                 const response = await fetch(this.route + endRoute, {
@@ -116,14 +131,6 @@ function app() {
         formatDate(datetimeString) {
             return datetimeString.split('T')[0];
         },
-        toggleDarkTheme() {
-            this.isDarkTheme = !this.isDarkTheme;
-            const body = document.querySelector('body');
-            if (this.isDarkTheme) {
-                body.classList.add('dark-theme');
-            } else {
-                body.classList.remove('dark-theme');
-            }
-        }
+        
     }
 }

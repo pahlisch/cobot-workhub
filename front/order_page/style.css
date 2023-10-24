@@ -27,6 +27,7 @@ body {
 .menu-item-price, .basket-item-price {
     font-weight: bold;
     font-size: 18px;
+    margin-right: 10px;
 }
 
 button {

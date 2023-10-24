@@ -66,7 +66,7 @@ async function getDateWithOrdersByMemberId(cobot_member_id) {
         const q = `SELECT order_date, group_concat(mi.item_name) as item_names FROM orders o
         INNER JOIN order_details od ON od.order_id = o.id
         INNER JOIN meal_items mi on od.meal_item_id = mi.id
-        WHERE o.cobot_member_id = ${cobot_member_id}
+        WHERE o.cobot_member_id = "${cobot_member_id}"
         AND DATE(o.created_at) >= CURRENT_DATE
         GROUP BY order_date`
         const [rows] = await connection.query(q);
@@ -132,7 +132,7 @@ async function getOrderDetailsByMemberIdAndDate(id, date) {
             `SELECT mi.* FROM orders o
             INNER JOIN order_details od ON od.order_id = o.id
             INNER JOIN meal_items mi on mi.id = od.meal_item_id
-            WHERE cobot_member_id ="${id}"
+            WHERE cobot_member_id = "${id}"
             AND order_date = "${date}"`);
             connection.end();
             return row;
