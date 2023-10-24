@@ -6,7 +6,11 @@ import { fileURLToPath } from 'url';
 import path from 'path'
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import moment from 'moment';
 
+const currentDate = moment().format('YYYY-MM-DD');
+
+const format = '.xls'
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
@@ -86,7 +90,7 @@ function generateCSV(data, filename) {
     });
 
     // Write CSV to file
-    const path = `./orders/${filename}.csv`;
+    const path = `./orders/${filename}${format}`;
     fs.writeFileSync(path, csv);
 
     return path;
@@ -98,7 +102,7 @@ async function DayOrderTotal() {
     try {
         const connection = await mysql.createConnection(dbUrl);
         const [data] = await connection.query(
-`select mi.item_name as plat, count(*) as quantité from orders o  
+`select o.order_date, mi.item_name as plat, count(*) as quantité from orders o  
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
@@ -120,7 +124,7 @@ async function DayOrderDetails() {
     try {
         const connection = await mysql.createConnection(dbUrl);
         const [data] = await connection.query(
-`select o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité from orders o  
+`select o.order_date, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité from orders o  
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
@@ -137,10 +141,73 @@ group by o.cobot_member_id, mi.item_name ;`);
     }
 }
 
+async function MonthOrderTotal() {
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const [data] = await connection.query(
+            `SELECT mi.item_name as plat, COUNT(*) as quantité, SUM(mi.price) as total_chf
+            FROM orders o
+            INNER JOIN order_details od ON od.order_id = o.id
+            INNER JOIN meal_items mi on od.meal_item_id = mi.id
+            WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+            AND YEAR(DATE(o.order_date)) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+            GROUP BY mi.item_name
+            
+            UNION
+            
+            SELECT 'Total' as plat, COUNT(*) as quantité, SUM(mi.price) as total_chf
+            FROM orders o
+            INNER JOIN order_details od ON od.order_id = o.id
+            INNER JOIN meal_items mi on od.meal_item_id = mi.id
+            WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+            AND YEAR(DATE(o.order_date)) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 DAY));` );
+        connection.end();
+
+        const htmlTable = generateHTMLTable(data);
+        const csvPath = generateCSV(data, "total_commande_du_mois");
+
+        return { htmlTable, csvPath } ;
+
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+    }
+
+    async function MonthOrderDetails() {
+        try {
+            const connection = await mysql.createConnection(dbUrl);
+            const [data] = await connection.query(
+    `select o.order_date, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité, sum(mi.price) as total_chf from orders o
+    INNER JOIN order_details od ON od.order_id = o.id
+    INNER JOIN meal_items mi on od.meal_item_id = mi.id
+    WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+    AND YEAR(DATE(o.order_date)) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+    group by o.cobot_member_id, mi.item_name 
+    
+    UNION
+    
+    SELECT 'Total', 'Total', 'Total' as plat, COUNT(*) as quantité, SUM(mi.price) as total_chf
+    FROM orders o
+    INNER JOIN order_details od ON od.order_id = o.id
+    INNER JOIN meal_items mi on od.meal_item_id = mi.id
+    WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
+    AND YEAR(DATE(o.order_date)) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 DAY));`);
+            connection.end();
+    
+            const csvPath = generateCSV(data, "détail_commande_du_mois");
+    
+            return csvPath ;
+    
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
 
 
 
-const sendEmail = async (order_table, csvPath) => {
+const sendEmail = async (order_table, csvPath, subject, filename) => {
     if (csvPath[0] === 'No data available' || csvPath[1] === 'No data available') {
       console.log('No data available to send in email.');
       return;
@@ -149,15 +216,15 @@ const sendEmail = async (order_table, csvPath) => {
     smtpTransport.sendMail({
       from: process.env.SENDER_ADDRESS,
       to: process.env.RECIPIENT,
-      subject: 'Commande du jour Workhub',
-      text: 'Veuillez trouvez les commandes du jour ci-dessous et en pièce jointe. \n En vous souhaitant une bonne journée',
+      subject: subject,
+      text: 'workhub order data',
       html: order_table,
       attachments: [{
-          filename: 'commande_du_jour.csv',
+          filename: `${filename[0]}${format}`,
           path: csvPath[0]
         },
         {
-          filename: 'détail_commande.csv',
+          filename: `${filename[1]}}${format}`,
           path: csvPath[1]
         }]
     }, (error, info) => {
@@ -172,7 +239,14 @@ const sendEmail = async (order_table, csvPath) => {
   
 
 (async () => {
-    const { htmlTable, csvPath }  = await DayOrderTotal();
-    const csvPath_2 = await DayOrderDetails();
-    sendEmail(htmlTable, [csvPath, csvPath_2]);
+    let { htmlTable, csvPath }  = await DayOrderTotal();
+    let csvPath_2 = await DayOrderDetails();
+    let filename = [`${currentDate}_commande_du_jour${format}`, `${currentDate}_détail_commande_du_jour${format}`];
+    sendEmail(htmlTable, [csvPath, csvPath_2], 'Commande du jour Workhub', filename);
+    if (true) {
+        let { htmlTable, csvPath }  = await MonthOrderTotal();
+        let csvPath_2 = await MonthOrderDetails();
+        let filename = [`${currentDate}_commande_du_mois${format}`, `${currentDate}_détail_commande_du_mois${format}`];
+        sendEmail(htmlTable, [csvPath, csvPath_2], 'Commande du mois Workhub', filename);
+    }
 })();
