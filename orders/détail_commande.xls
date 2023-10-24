@@ -1,2 +1,2 @@
-order_date;name;plat;quantité
-Tue Oct 24 2023 00:00:00 GMT+0200 (Central European Summer Time);22;Mushroom Risotto with salad;1
+date_commande;name;plat;quantité
+24 10 2023;22;Mushroom Risotto with salad;1
