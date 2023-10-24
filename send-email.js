@@ -102,7 +102,7 @@ async function DayOrderTotal() {
     try {
         const connection = await mysql.createConnection(dbUrl);
         const [data] = await connection.query(
-`select DATE_FORMAT(order_date, '%d %m %Y') AS date_commande, mi.item_name as plat, count(*) as quantité from orders o  
+`select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, mi.item_name as plat, count(*) as quantité from orders o  
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
@@ -124,7 +124,7 @@ async function DayOrderDetails() {
     try {
         const connection = await mysql.createConnection(dbUrl);
         const [data] = await connection.query(
-`select DATE_FORMAT(order_date, '%d %m %Y') AS date_commande, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité from orders o  
+`select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité from orders o  
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
@@ -178,7 +178,7 @@ async function MonthOrderTotal() {
         try {
             const connection = await mysql.createConnection(dbUrl);
             const [data] = await connection.query(
-    `select DATE_FORMAT(order_date, '%d %m %Y') AS date_commande, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité, sum(mi.price) as total_chf from orders o
+    `select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité, sum(mi.price) as total_chf from orders o
     INNER JOIN order_details od ON od.order_id = o.id
     INNER JOIN meal_items mi on od.meal_item_id = mi.id
     WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
