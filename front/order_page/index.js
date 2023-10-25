@@ -55,7 +55,7 @@ function app() {
             let membershipId = "membership_not_found";
             try {
                 for (let i=0; i<data.memberships.length; i++) {
-                    if (data.memberships[i].space_name === space_name) {
+                    if (data.memberships[i].space_name === this.space_name) {
                         userName = data.memberships[i].name;
                         membershipId = data.memberships[i].id;
                     }

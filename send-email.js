@@ -7,15 +7,16 @@ import path from 'path'
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import moment from 'moment';
+import axios from 'axios';
 
-const currentDate = moment().format('YYYY-MM-DD');
 
-const format = '.xlsx'
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
-
+const currentDate = moment().format('YYYY-MM-DD');
+const subdomain = "wiz-cobot"
+const format = '.xlsx'
 // Initialize the express app
 const app = express();
 app.use(cors());
@@ -238,6 +239,52 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
     });
   }
   
+  async function createChargesForAllUsers() {
+    try {
+      const connection = await mysql.createConnection(dbUrl);
+      const [orders] = await connection.query(
+        `SELECT o.cobot_member_id, u.membership_id, mi.item_name, mi.price
+        FROM orders o
+        INNER JOIN order_details od ON od.order_id = o.id
+        INNER JOIN meal_items mi ON mi.id = od.meal_item_id
+        INNER JOIN users u ON u.cobot_id = o.cobot_member_id
+        WHERE o.order_date = CURRENT_DATE()`
+      );
+      connection.end();
+  
+      for (const order of orders) {
+        await createChargeForUser(
+          order.price,
+          order.membership_id,
+          order.item_name
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  
+  async function createChargeForUser(amount, membershipId, itemName) {
+    const url = `https://${subdomain}.cobot.me/api/memberships/${membershipId}/charges`;
+    const data = {
+      description: itemName,
+      amount: amount.toString(),
+      charged_at: currentDate,
+    };
+  
+    try {
+      const response = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${process.env.COBOT_ACCESS_TOKEN}`,
+        },
+      });
+  
+      console.log('Charge created:', response.data);
+    } catch (err) {
+      console.error('Failed to create charge:', err);
+    }
+  }
+  
   
 
 (async () => {
@@ -251,4 +298,5 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
         let filename = [`${currentDate}_commande_du_mois${format}`, `${currentDate}_détail_commande_du_mois${format}`];
         sendEmail(htmlTable, [csvPath, csvPath_2], 'Commande du mois Workhub', filename);
     }
+    createChargesForAllUsers();
 })();
