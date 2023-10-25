@@ -368,3 +368,33 @@ app.delete('/meal/delete/:id', async (req, res) => {
         res.status(500).send('Error deleting meal item');
     }
 });
+
+
+async function upsertUser(cobotId, userName) {
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const query = `
+            INSERT INTO users (cobot_id, user_name)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE
+            user_name = VALUES(user_name);
+        `;
+        const [results] = await connection.execute(query, [cobotId, userName]);
+        connection.end();
+        return results;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+app.post('/user/upsert', async function (req, res) {
+    console.log(req.body);
+    const { cobotId, userName } = req.body;
+    const result = await upsertUser(cobotId, userName);
+    if (result) {
+        res.status(200).json({ message: 'User upserted successfully', result });
+    } else {
+        res.status(500).json({ message: 'Failed to upsert user' });
+    }
+});

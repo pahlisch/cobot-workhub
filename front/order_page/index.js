@@ -11,7 +11,7 @@ function app() {
         cur: ' CHF',
         member_id: '',
         async fetchItems() {
-            this.member_id = await this.getUserId();
+            this.member_id = await this.upsertUserId();
             this.items = await this.getRoute('/meals');
             this.future_orders = await this.getRoute(`/orders/${this.member_id}`);
             this.basket = await this.getRoute(`/orderDetails/${this.member_id}/${this.date}`);
@@ -47,8 +47,16 @@ function app() {
                 throw error;
             }
         },
-        async getUserId() {
-            let data = await this.getCobot("/user")
+        async upsertUserId() {
+            let data = await this.getCobot("/user");
+            console.log(data); // data.memberships[0].name;
+            try {
+                let userName = data.memberships[0].name;
+            } catch (error) {
+                let userName = "name_not_found";
+                throw error;
+            }
+            this.postRoute("/user/upsert", {cobotId: data.id, userName: userName})
             return data.id
         }, 
         async postRoute(endRoute, postData) {
