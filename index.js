@@ -10,11 +10,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
-
+const API_TOKEN = process.env.API_TOKEN
 // Initialize the express app
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use((req, res, next) => {
+    const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+    if (token === API_TOKEN) {
+        next();
+    } else {
+        res.status(401).send('Unauthorized');
+    }
+});
 
 // Database connection
 const dbConfig = {
@@ -24,11 +33,7 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-
-
-
 const dbUrl = process.env.CLEARDB_DATABASE_URL;
-
 
 const smtpTransport = nodemailer.createTransport({
   host: process.env.MAILGUN_SMTP_SERVER,
@@ -40,16 +45,13 @@ const smtpTransport = nodemailer.createTransport({
   }
 });
 
-
-
 async function getMealItems() {
     try {
-        console.log("try conn")
+
         const connection = await mysql.createConnection(dbUrl);
-        console.log("connected")
         const [rows] = await connection.query('SELECT * FROM meal_items');
         connection.end();
-        console.log(rows)
+
         return rows;
     } catch (err) {
         console.error(err);
@@ -58,19 +60,23 @@ async function getMealItems() {
 }
 
 async function getDateWithOrdersByMemberId(cobot_member_id) {
+    if (typeof cobot_member_id !== 'string' || !/^\d+$/.test(cobot_member_id)) {
+        throw new Error('Invalid input');
+    }
 
     try {
         const connection = await mysql.createConnection(dbUrl);
-        console.log("connected")
-        const q = `SELECT order_date, group_concat(mi.item_name) as item_names FROM orders o
-        INNER JOIN order_details od ON od.order_id = o.id
-        INNER JOIN meal_items mi on od.meal_item_id = mi.id
-        WHERE o.cobot_member_id = "${cobot_member_id}"
-        AND DATE(o.order_date) >= CURRENT_DATE
-        GROUP BY order_date`
-        const [rows] = await connection.query(q);
+        const query = `
+            SELECT order_date, group_concat(mi.item_name) as item_names
+            FROM orders o
+            INNER JOIN order_details od ON od.order_id = o.id
+            INNER JOIN meal_items mi on od.meal_item_id = mi.id
+            WHERE o.cobot_member_id = ?
+            AND DATE(o.order_date) >= CURRENT_DATE
+            GROUP BY order_date
+        `;
+        const [rows] = await connection.execute(query, [cobot_member_id]);
         connection.end();
-        console.log(rows)
         return rows;
     } catch (err) {
         console.error(err);
@@ -78,83 +84,93 @@ async function getDateWithOrdersByMemberId(cobot_member_id) {
     }
 }
 
+
 async function getOrderByMemberId(id) {
-    const isnum = true // /^\d+$/.test(id);
-    if (isnum) {
-        try {
-            const connection = await mysql.createConnection(dbUrl);
-            const [row] = await connection.query(
-            `SELECT * FROM orders o
+    if (typeof id !== 'string' || !/^\d+$/.test(id)) {
+        throw new Error('Invalid input');
+    }
+
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const query = `
+            SELECT * FROM orders o
             INNER JOIN order_details od ON od.order_id = o.id
             INNER JOIN meal_items mi on mi.id = od.meal_item_id
-            WHERE cobot_member_id ="${id}"`);
-            connection.end();
-            return row;
-        } catch (err) {
-            console.error(err);
-            return [];
-        }
-    }
-    else {
+            WHERE cobot_member_id = ?
+        `;
+        const [rows] = await connection.execute(query, [id]);
+        connection.end();
+        return rows;
+    } catch (err) {
+        console.error(err);
         return [];
     }
 }
+
 
 
 async function getOrderByMemberIdAndDate(id, date) {
-    const isnum = true // /^\d+$/.test(id);
-    if (isnum) {
-        try {
-            const connection = await mysql.createConnection(dbUrl);
-            const [row] = await connection.query(
-            `SELECT * FROM orders o
-            WHERE cobot_member_id ="${id}"
-            AND order_date = "${date}"`);
-            connection.end();
-            return row;
-        } catch (err) {
-            console.error(err);
-            return [];
-        }
+    if (typeof id !== 'string' || !/^\d+$/.test(id) || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        throw new Error('Invalid input');
     }
-    else {
+
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const query = `
+            SELECT * FROM orders o
+            WHERE cobot_member_id = ?
+            AND order_date = ?
+        `;
+        const [rows] = await connection.execute(query, [id, date]);
+        connection.end();
+        return rows;
+    } catch (err) {
+        console.error(err);
         return [];
     }
 }
+
 
 async function getOrderDetailsByMemberIdAndDate(id, date) {
-    const isnum = true // /^\d+$/.test(id);
-    if (isnum) {
-        try {
-            const connection = await mysql.createConnection(dbUrl);
-            const [row] = await connection.query(
-            `SELECT mi.* FROM orders o
-            INNER JOIN order_details od ON od.order_id = o.id
-            INNER JOIN meal_items mi on mi.id = od.meal_item_id
-            WHERE cobot_member_id = "${id}"
-            AND order_date = "${date}"`);
-            connection.end();
-            return row;
-        } catch (err) {
-            console.error(err);
-            return [];
-        }
+    if (typeof id !== 'string' || typeof date !== 'string' || !/^\d+$/.test(id)) {
+        throw new Error('Invalid input');
     }
-    else {
+
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const [rows] = await connection.execute(
+            `SELECT mi.* FROM orders o
+             INNER JOIN order_details od ON od.order_id = o.id
+             INNER JOIN meal_items mi ON mi.id = od.meal_item_id
+             WHERE cobot_member_id = ? AND order_date = ?`,
+            [id, date]
+        );
+        connection.end();
+        return rows;
+    } catch (err) {
+        console.error(err);
         return [];
     }
 }
 
+
+
 async function insertOrder(req) {
-    console.log(req.body)
+
     const cobot_member_id = req.body.cobot_member_id;
     const order_date = req.body.order_date;
+
+    if (typeof cobot_member_id !== 'string' || !/^\d+$/.test(cobot_member_id) || 
+    typeof order_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(order_date)) {
+    res.status(400).send({ message: 'Invalid input' });
+    return;
+    }
 
     const sql = `INSERT INTO orders (cobot_member_id, order_date) VALUES (?, ?)`;
     const values = [cobot_member_id, order_date];
     try {
         const connection = await mysql.createConnection(dbUrl);
-        console.log("connected")
+
         
         connection.query(sql, values, (err, result) => {
             if (err) {
@@ -171,12 +187,18 @@ async function insertOrder(req) {
 }
 
 async function deleteOrderByMemberAndDate(member_id, date) {
+
+    if (typeof member_id !== 'string' || !/^\d+$/.test(member_id) || 
+    typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error('Invalid input');
+    }
+
     let deleteOrderDetail = `DELETE od FROM order_details od INNER JOIN orders o ON od.order_id = o.id WHERE o.cobot_member_id = ? AND o.order_date = ?`;
     let deleteOrder = `DELETE FROM orders WHERE cobot_member_id = ? AND order_date = ?`;
 
     try {
         const connection = await mysql.createConnection(dbUrl);
-        console.log("connected");
+
 
 
         let resultOrderDetail = await connection.query(deleteOrderDetail, [member_id, date]);
@@ -194,6 +216,11 @@ async function deleteOrderByMemberAndDate(member_id, date) {
 
 async function insertOrderDetails(order_id, req, res) {
 
+    if (!Array.isArray(meal_items) || meal_items.some(item => typeof item !== 'string' || !/^\d+$/.test(item))) {
+        res.send({ message: 'Invalid input' });
+        return;
+    }
+
     const meal_items = req.body.meal_items;
 
     let deleteSql = `DELETE FROM order_details WHERE order_id = ?`;
@@ -210,7 +237,7 @@ async function insertOrderDetails(order_id, req, res) {
 
     try {
         const connection = await mysql.createConnection(dbUrl);
-        console.log("connected");
+
 
         connection.query(deleteSql, [order_id], (err, result) => {
             if (err) {
@@ -236,16 +263,38 @@ async function insertOrderDetails(order_id, req, res) {
 
 }
 
+async function upsertUser(cobotId, userName) {
+    if (typeof cobotId !== 'string' || cobotId.trim() === '') {
+        console.error('Invalid cobotId');
+        return null;
+    }
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        const query = `
+            INSERT INTO users (cobot_id, user_name)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE
+            user_name = VALUES(user_name);
+        `;
+        const [results] = await connection.execute(query, [cobotId, userName]);
+        connection.end();
+        return results;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
 // Endpoint to get the list of menu item
 app.get('/meals', async (req, res) => {
-    console.log("get meals")
+
     const meals = await getMealItems();
     res.send(meals);
 
 });
 
 app.get('/orders/:id', async (req, res) => {
-    console.log("get orders")
+
     const orders = await getDateWithOrdersByMemberId(req.params.id);
     res.send(orders);
 
@@ -253,52 +302,27 @@ app.get('/orders/:id', async (req, res) => {
 
 
 app.get('/meals/member/:id', async function (req, res) {
-    console.log(req.params)
-    console.log("--------------")
     const meals = await  getOrderByMemberId(req.params.id);
     res.send(meals);
 })
 
 app.get('/order/delete/:member/:date', async function (req, res) {
-    console.log(req.params)
-    console.log("--------------")
     deleteOrderByMemberAndDate(req.params.member, req.params.date);
-    
 })
 
 
 app.get('/orderDetails/:member/:date', async function (req, res) {
-    console.log("getOrderDetails");
     const orderDetails = await getOrderDetailsByMemberIdAndDate(req.params.member, req.params.date);
     res.send(orderDetails);
 })
 
-app.get('/sendTestEmail', async function (req, res) {
-smtpTransport.sendMail({
-    from: process.env.SENDER_ADDRESS,
-    to: process.env.RECIPIENT,
-    subject: 'Hello with attachment',
-    text: 'Hello world',
-    html: '<b>Hello world</b>',
-  }, (error, info) => {
-    if (error) {
-      console.log('Error:', error);
-      res.send(error)
-    } else {
-      console.log('Email sent:', info.response);
-      res.send(info.response)
-    }
-  });
-})
 
 app.post('/order/insert', async function (req, res) {
-    console.log("post route called")
     try {
        
         let cobot_member_id = req.body.cobot_member_id; 
         let order_date = req.body.order_date; 
         let existing_order = await getOrderByMemberIdAndDate(cobot_member_id, order_date);
-        console.log(existing_order);
 
         if (existing_order.length === 0) {
             await insertOrder(req); 
@@ -325,7 +349,7 @@ const port = process.env.PORT || 8080;
 
 app.listen(port, () => console.log(`Listening on port http://localhost:${port}/meals`));
 
-//test
+
 // Add a meal item
 app.post('/meal/add', async (req, res) => {
     const { item_name, item_description, price } = req.body;
@@ -370,26 +394,7 @@ app.delete('/meal/delete/:id', async (req, res) => {
 });
 
 
-async function upsertUser(cobotId, userName) {
-    try {
-        const connection = await mysql.createConnection(dbUrl);
-        const query = `
-            INSERT INTO users (cobot_id, user_name)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE
-            user_name = VALUES(user_name);
-        `;
-        const [results] = await connection.execute(query, [cobotId, userName]);
-        connection.end();
-        return results;
-    } catch (err) {
-        console.error(err);
-        return null;
-    }
-}
-
 app.post('/user/upsert', async function (req, res) {
-    console.log(req.body);
     const { cobotId, userName } = req.body;
     const result = await upsertUser(cobotId, userName);
     if (result) {

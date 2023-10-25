@@ -10,6 +10,7 @@ function app() {
         future_orders: [],
         cur: ' CHF',
         member_id: '',
+        api_token: 'YOUR_API_TOKEN',
         async fetchItems() {
             this.member_id = await this.upsertUserId();
             this.items = await this.getRoute('/meals');
@@ -21,7 +22,8 @@ function app() {
                 const response = await fetch(this.route + endRoute, {
                     method: "GET",
                     headers: {
-                      "Cache-Control": "no-cache"
+                      "Cache-Control": "no-cache",
+                      "Authorization": "Bearer " + this.api_token,
                     },
                   });
                 const data = await response.json();
@@ -49,14 +51,14 @@ function app() {
         },
         async upsertUserId() {
             let data = await this.getCobot("/user");
-            console.log(data); // data.memberships[0].name;
+
             let userName = "name_not_found";
             try {
                 userName = data.memberships[0].name;
             } catch (error) {
                 throw error;
             }
-            console.log({cobotId: data.id, userName: userName});
+
             this.postRoute("/user/upsert", {cobotId: data.id, userName: userName})
             return data.id
         }, 
@@ -65,7 +67,8 @@ function app() {
                 const response = await fetch(this.route + endRoute, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + this.api_token,
                     },
                     body: JSON.stringify(postData)
                 });
@@ -73,7 +76,7 @@ function app() {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 } 
-                console.log(response)
+
 
             } catch (error) {
                 console.error("Error posting data:", error);
@@ -82,7 +85,7 @@ function app() {
         },
         addToBasket(item) {
             this.basket.push(item);
-            console.log(Array.from(this.basket));
+
         },
         removeFromBasket(index) {
             this.basket.splice(index, 1);
@@ -91,7 +94,7 @@ function app() {
             let currentDate = new Date();
             let basketDate = new Date(this.date);
             if (basketDate <= currentDate) {
-                console.log("can't change past basket")
+
                 this.modalMessage = "You cannot modify today's order nor past order"
                 this.showModal = true;
                 return
@@ -100,7 +103,7 @@ function app() {
             let meal_ids = [];
             
             if (this.basket.length === 0) {
-                console.log("basket empty - deleting order")
+
                 this.getRoute(`/order/delete/${this.member_id}/${this.date}`);
             } else {
 
@@ -126,7 +129,7 @@ function app() {
             return total;
         },
         async loadOrder(date) {
-            console.log(date)
+
             this.basket = [];
             this.dateOrder = await this.getRoute(`/orderDetails/${this.member_id}/${date}`);
 
