@@ -43,7 +43,6 @@ const smtpTransport = nodemailer.createTransport({
 
 
 async function getMealItems() {
-    console.log("outer getMealsItems")
     try {
         console.log("try conn")
         const connection = await mysql.createConnection(dbUrl);
@@ -59,7 +58,7 @@ async function getMealItems() {
 }
 
 async function getDateWithOrdersByMemberId(cobot_member_id) {
-    console.log("getdateWithOrders")
+
     try {
         const connection = await mysql.createConnection(dbUrl);
         console.log("connected")
@@ -67,7 +66,7 @@ async function getDateWithOrdersByMemberId(cobot_member_id) {
         INNER JOIN order_details od ON od.order_id = o.id
         INNER JOIN meal_items mi on od.meal_item_id = mi.id
         WHERE o.cobot_member_id = "${cobot_member_id}"
-        AND DATE(o.created_at) >= CURRENT_DATE
+        AND DATE(o.order_date) >= CURRENT_DATE
         GROUP BY order_date`
         const [rows] = await connection.query(q);
         connection.end();
