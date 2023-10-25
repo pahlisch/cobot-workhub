@@ -60,7 +60,7 @@ async function getMealItems() {
 
 async function getDateWithOrdersByMemberId(cobot_member_id) {
 
-    }
+    
 
     try {
         const connection = await mysql.createConnection(dbUrl);
