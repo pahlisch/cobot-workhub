@@ -59,12 +59,7 @@ async function getMealItems() {
 }
 
 async function getDateWithOrdersByMemberId(cobot_member_id) {
-    if (typeof cobot_member_id !== 'string' || !/^\d+$/.test(cobot_member_id)) {
-        console.log('Invalid input');
-        console.log(cobot_member_id !== 'string');
-        console.log(!/^\d+$/.test(cobot_member_id));
-        console.log(cobot_member_id);
-        throw new Error('Invalid input');
+
     }
 
     try {
@@ -89,9 +84,7 @@ async function getDateWithOrdersByMemberId(cobot_member_id) {
 
 
 async function getOrderByMemberId(id) {
-    if (typeof id !== 'string' || !/^\d+$/.test(id)) {
-        throw new Error('Invalid input');
-    }
+
 
     try {
         const connection = await mysql.createConnection(dbUrl);
@@ -113,9 +106,7 @@ async function getOrderByMemberId(id) {
 
 
 async function getOrderByMemberIdAndDate(id, date) {
-    if (typeof id !== 'string' || !/^\d+$/.test(id) || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        throw new Error('Invalid input');
-    }
+
 
     try {
         const connection = await mysql.createConnection(dbUrl);
@@ -135,9 +126,7 @@ async function getOrderByMemberIdAndDate(id, date) {
 
 
 async function getOrderDetailsByMemberIdAndDate(id, date) {
-    if (typeof id !== 'string' || typeof date !== 'string' || !/^\d+$/.test(id)) {
-        throw new Error('Invalid input');
-    }
+
 
     try {
         const connection = await mysql.createConnection(dbUrl);
@@ -163,11 +152,7 @@ async function insertOrder(req) {
     const cobot_member_id = req.body.cobot_member_id;
     const order_date = req.body.order_date;
 
-    if (typeof cobot_member_id !== 'string' || !/^\d+$/.test(cobot_member_id) || 
-    typeof order_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(order_date)) {
-    res.status(400).send({ message: 'Invalid input' });
-    return;
-    }
+
 
     const sql = `INSERT INTO orders (cobot_member_id, order_date) VALUES (?, ?)`;
     const values = [cobot_member_id, order_date];
@@ -191,10 +176,7 @@ async function insertOrder(req) {
 
 async function deleteOrderByMemberAndDate(member_id, date) {
 
-    if (typeof member_id !== 'string' || !/^\d+$/.test(member_id) || 
-    typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    throw new Error('Invalid input');
-    }
+
 
     let deleteOrderDetail = `DELETE od FROM order_details od INNER JOIN orders o ON od.order_id = o.id WHERE o.cobot_member_id = ? AND o.order_date = ?`;
     let deleteOrder = `DELETE FROM orders WHERE cobot_member_id = ? AND order_date = ?`;
@@ -219,10 +201,6 @@ async function deleteOrderByMemberAndDate(member_id, date) {
 
 async function insertOrderDetails(order_id, req, res) {
 
-    if (!Array.isArray(meal_items) || meal_items.some(item => typeof item !== 'string' || !/^\d+$/.test(item))) {
-        res.send({ message: 'Invalid input' });
-        return;
-    }
 
     const meal_items = req.body.meal_items;
 
@@ -267,10 +245,7 @@ async function insertOrderDetails(order_id, req, res) {
 }
 
 async function upsertUser(cobotId, userName) {
-    if (typeof cobotId !== 'string' || cobotId.trim() === '') {
-        console.error('Invalid cobotId');
-        return null;
-    }
+
     try {
         const connection = await mysql.createConnection(dbUrl);
         const query = `
