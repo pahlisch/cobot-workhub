@@ -11,10 +11,11 @@ const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
 const API_TOKEN = process.env.API_TOKEN
-// Initialize the express app
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.options('*', cors()); 
 
 app.use((req, res, next) => {
     const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
@@ -25,7 +26,6 @@ app.use((req, res, next) => {
     }
 });
 
-// Database connection
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

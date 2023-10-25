@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"></script>
@@ -6,32 +5,58 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <button @click="toggleDarkTheme">Toggle Dark Theme</button>
-    <div 
-    x-data="app()"
-    x-init="fetchItems()"
-    >
-    <input type="date" x-model="date"  x-on:change="console.log(date)"/>
-<h2>Menu</h2>
-
-
-    <template x-for="(item, index) in items" :key="index">
-        <div>
-            <span x-text="item.id"></span>
-            <span x-text="item.item_name"></span> -
-            <span x-text="item.item_description"></span>
-            <span x-text="item.price + cur"></span>
-            <button @click="addToBasket(item)">Add</button>
+    <div class="container" x-data="app({ showModal: false})" x-init="fetchItems()">
+        <input type="date" placeholder="dd-mm-yyyy" x-model="date" x-on:change="loadOrder(date)" />
+        <h2>Date with orders</h2>
+        <template x-for="(order, index) in future_orders" :key="index">
+            <div class="menu-item">
+                <div class="menu-item-description">
+                    <span x-text="formatDate(order.order_date)"></span>
+                    <span x-text="order.item_names"></span>
+                </div>
+                <div>
+                    <button @click="date = order.order_date; loadOrder(date)">Modify Order</button>
+                </div>
+            </div>
+        </template>
+        <h2>Menu</h2>
+        <template x-for="(item, index) in items" :key="index">
+            <div class="menu-item">
+                <div class="menu-item-description">
+                    <span x-text="item.id" style="display: none;"></span>
+                    <span x-text="item.item_name"></span> -
+                    <span x-text="item.item_description"></span>
+                </div>
+                <div class="menu-item-price">
+                    <span x-text="item.price + cur"></span>
+                </div>
+                <div>
+                    <button @click="addToBasket(item)">Add</button>
+                </div>
+            </div>
+        </template>
+        <h2>Order for <span x-text=formatDate(date)></span></h2>
+        <template x-for="(item, index) in basket" :key="index">
+            <div class="basket-item">
+                <div class="menu-item-description">
+                    <span x-text="item.item_name"></span>
+                </div>
+                <div class="basket-item-price">
+                    <span x-text="item.price + cur"></span>
+                </div>
+                <div>
+                    <button @click="removeFromBasket(index)">Remove</button>
+                </div>
+            </div>
+        </template>
+        <div class="total">Total: <span x-text="returnTotalBasketAmount() + cur"></span></div>
+        <button class="confirm" @click="confirmBasket()">Confirm</button>
+        <div x-show="showModal" class="modal-bg">
+            <div class="modal">
+                <h3> <span x-text="modalMessage"></span></h3>
+                <button @click="showModal = false; loadOrder(date)">OK</button>
+            </div>
         </div>
-    </template>
-    <h2>Order for <span x-text="date"></span></h2>
-    <template x-for="(item, index) in basket" :key="index">
-        <div>
-            <span x-text="item.item_name"></span>
-            <span x-text="item.price + cur"></span>
-            <button @click="removeFromBasket(index)">Remove from basket</button>
-        </div>
-    </template>
-    <div>Total: <span x-text="returnTotalBasketAmount() + cur"></span></div>
-    <button @click="confirmBasket()">Confirm</button>   
-</div>
+    </div>
+</body>
+</html>
