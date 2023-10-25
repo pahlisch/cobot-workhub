@@ -9,7 +9,7 @@ function app() {
         basket: [],
         future_orders: [],
         cur: ' CHF',
-        member_id: '',
+        space_name: 'wiz-cobot',
         api_token: 'YOUR_API_TOKEN',
         async fetchItems() {
             this.member_id = await this.upsertUserId();
@@ -51,15 +51,21 @@ function app() {
         },
         async upsertUserId() {
             let data = await this.getCobot("/user");
-
             let userName = "name_not_found";
+            let membershipId = "membership_not_found";
             try {
-                userName = data.memberships[0].name;
+                for (let i=0; i<data.memberships.length; i++) {
+                    if (data.memberships[i].space_name === space_name) {
+                        userName = data.memberships[i].name;
+                        membershipId = data.memberships[i].id;
+                    }
+                }
+                
             } catch (error) {
                 throw error;
             }
 
-            this.postRoute("/user/upsert", {cobotId: data.id, userName: userName})
+            this.postRoute("/user/upsert", {cobotId: data.id, userName: userName, membershipId: membershipId})
             return data.id
         }, 
         async postRoute(endRoute, postData) {

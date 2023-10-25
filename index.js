@@ -244,17 +244,17 @@ async function insertOrderDetails(order_id, req, res) {
 
 }
 
-async function upsertUser(cobotId, userName) {
+async function upsertUser(cobotId, userName, membershipId) {
 
     try {
         const connection = await mysql.createConnection(dbUrl);
         const query = `
-            INSERT INTO users (cobot_id, user_name)
-            VALUES (?, ?)
+            INSERT INTO users (cobot_id, user_name, membership_id)
+            VALUES (?, ?, ?)
             ON DUPLICATE KEY UPDATE
             user_name = VALUES(user_name);
         `;
-        const [results] = await connection.execute(query, [cobotId, userName]);
+        const [results] = await connection.execute(query, [cobotId, userName, membershipId]);
         connection.end();
         return results;
     } catch (err) {
@@ -373,8 +373,8 @@ app.delete('/meal/delete/:id', async (req, res) => {
 
 
 app.post('/user/upsert', async function (req, res) {
-    const { cobotId, userName } = req.body;
-    const result = await upsertUser(cobotId, userName);
+    const { cobotId, userName, membershipId } = req.body;
+    const result = await upsertUser(cobotId, userName, membershipId);
     if (result) {
         res.status(200).json({ message: 'User upserted successfully', result });
     } else {
