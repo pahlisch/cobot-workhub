@@ -1,8 +1,5 @@
 date_commande;name;plat;quantité;total_chf
-05 10 2023;22;Burger;11;165
-01 10 2023;22;Caesar Salad;1;10
-24 10 2023;22;Mushroom Risotto with salad;1;11
-12 10 2023;22;New chef's salad with eggs;2;18
-05 10 2023;22;Pizza Margherita;2;24
-12 10 2023;22;Vegetable Stir Fry;15;150
-Total;Total;Total;32;378
+25-10-2023;lucas;Mushroom Risotto with salad;1;11
+27-10-2023;lucas;New chef's salad with eggs;1;9
+25-10-2023;lucas;Tomato Soup;2;16
+Total;Total;Total;38;441

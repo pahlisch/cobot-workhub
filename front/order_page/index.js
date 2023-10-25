@@ -50,12 +50,13 @@ function app() {
         async upsertUserId() {
             let data = await this.getCobot("/user");
             console.log(data); // data.memberships[0].name;
+            let userName = "name_not_found";
             try {
-                let userName = data.memberships[0].name;
+                userName = data.memberships[0].name;
             } catch (error) {
-                let userName = "name_not_found";
                 throw error;
             }
+            console.log({cobotId: data.id, userName: userName});
             this.postRoute("/user/upsert", {cobotId: data.id, userName: userName})
             return data.id
         }, 

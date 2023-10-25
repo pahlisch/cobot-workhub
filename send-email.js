@@ -10,7 +10,7 @@ import moment from 'moment';
 
 const currentDate = moment().format('YYYY-MM-DD');
 
-const format = '.xls'
+const format = '.xlsx'
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
@@ -124,11 +124,12 @@ async function DayOrderDetails() {
     try {
         const connection = await mysql.createConnection(dbUrl);
         const [data] = await connection.query(
-`select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité from orders o  
+`select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, u.user_name as nom, mi.item_name as plat, count(*) as quantité from orders o  
+inner join users u on o.cobot_member_id = u.cobot_id
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
-group by o.cobot_member_id, mi.item_name ;`);
+group by o.cobot_member_id, mi.item_name, u.user_name ;`);
         connection.end();
 
         const csvPath = generateCSV(data, "détail_commande");
@@ -178,12 +179,13 @@ async function MonthOrderTotal() {
         try {
             const connection = await mysql.createConnection(dbUrl);
             const [data] = await connection.query(
-    `select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, o.cobot_member_id as name, mi.item_name as plat, count(*) as quantité, sum(mi.price) as total_chf from orders o
+    `select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, u.user_name as name, mi.item_name as plat, count(*) as quantité, sum(mi.price) as total_chf from orders o
+    inner join users u on o.cobot_member_id = u.cobot_id
     INNER JOIN order_details od ON od.order_id = o.id
     INNER JOIN meal_items mi on od.meal_item_id = mi.id
     WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
     AND YEAR(DATE(o.order_date)) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
-    group by o.cobot_member_id, mi.item_name 
+    group by u.user_name, mi.item_name, o.cobot_member_id
     
     UNION
     
