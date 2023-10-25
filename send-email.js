@@ -15,8 +15,10 @@ const envPath = path.join(__dirname, '.env');
 dotenv.config({ path: envPath });
 
 const currentDate = moment().format('YYYY-MM-DD');
-const subdomain = "wiz-cobot"
+const subdomain = process.env.SUB_DOMAIN
 const format = '.xlsx'
+const tax_rate = process.env.TAX_RATE
+
 // Initialize the express app
 const app = express();
 app.use(cors());
@@ -270,6 +272,7 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
       description: itemName,
       amount: amount.toString(),
       charged_at: currentDate,
+      tax_rate: tax_rate
     };
   
     try {
