@@ -15,7 +15,6 @@ const API_TOKEN = process.env.API_TOKEN
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.options('*', cors()); 
 
 app.use((req, res, next) => {
     const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
@@ -62,6 +61,9 @@ async function getMealItems() {
 async function getDateWithOrdersByMemberId(cobot_member_id) {
     if (typeof cobot_member_id !== 'string' || !/^\d+$/.test(cobot_member_id)) {
         console.log('Invalid input');
+        console.log(cobot_member_id !== 'string');
+        console.log(!/^\d+$/.test(cobot_member_id));
+        console.log(cobot_member_id);
         throw new Error('Invalid input');
     }
 
