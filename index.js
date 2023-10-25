@@ -61,6 +61,7 @@ async function getMealItems() {
 
 async function getDateWithOrdersByMemberId(cobot_member_id) {
     if (typeof cobot_member_id !== 'string' || !/^\d+$/.test(cobot_member_id)) {
+        console.log('Invalid input');
         throw new Error('Invalid input');
     }
 
