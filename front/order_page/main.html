@@ -11,7 +11,7 @@
         <template x-for="(order, index) in future_orders" :key="index">
             <div class="menu-item">
                 <div class="menu-item-description">
-                    <span x-text="formatDate(order.order_date)"></span>
+                    <strong><span x-text="formatDate(order.order_date)"></span></strong></br>
                     <span x-text="order.item_names"></span>
                 </div>
                 <div>

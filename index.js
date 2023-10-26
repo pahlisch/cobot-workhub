@@ -252,7 +252,9 @@ async function upsertUser(cobotId, userName, membershipId) {
             INSERT INTO users (cobot_id, user_name, membership_id)
             VALUES (?, ?, ?)
             ON DUPLICATE KEY UPDATE
-            user_name = VALUES(user_name);
+            user_name = VALUES(user_name),
+            membership_id = VALUES(membership_id)
+            ;
         `;
         const [results] = await connection.execute(query, [cobotId, userName, membershipId]);
         connection.end();
