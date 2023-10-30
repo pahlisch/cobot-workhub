@@ -384,7 +384,7 @@ app.post('/user/upsert', async function (req, res) {
     }
 });
 
-app.put('/display/update/:id', async (req, res) => {
+app.put('/meal/display/:id', async (req, res) => {
     const { id } = req.params;
     const { value } = req.body;
     try {
