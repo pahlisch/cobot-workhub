@@ -335,7 +335,7 @@ app.post('/meal/add', async (req, res) => {
     const { item_name, item_description, price_restaurant_invoice, price_meal_item } = req.body;
     try {
         const connection = await mysql.createConnection(dbUrl);
-        await connection.query('INSERT INTO meal_items (item_name, item_description, price_restaurant_invoice, price_meal_item) VALUES (?, ?, ?)', [item_name, item_description, price]);
+        await connection.query('INSERT INTO meal_items (item_name, item_description, price_restaurant_invoice, price_meal_item) VALUES (?, ?, ?, ?)', [item_name, item_description, price_restaurant_invoice, price_meal_item]);
         connection.end();
         res.send({ message: 'Meal item added successfully' });
     } catch (err) {
