@@ -386,10 +386,10 @@ app.post('/user/upsert', async function (req, res) {
 
 app.put('/meal/display/:id', async (req, res) => {
     const { id } = req.params;
-    const { value } = req.body;
+    const { display } = req.body;
     try {
         const connection = await mysql.createConnection(dbUrl);
-        await connection.query('UPDATE meal_items SET display = ? WHERE id = ?', [value, id]);
+        await connection.query('UPDATE meal_items SET display = ? WHERE id = ?', [display, id]);
         connection.end();
         res.send({ message: 'Display value updated successfully' });
     } catch (err) {
