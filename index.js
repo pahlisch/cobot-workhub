@@ -332,10 +332,10 @@ app.listen(port, () => console.log(`Listening on port http://localhost:${port}/m
 
 // Add a meal item
 app.post('/meal/add', async (req, res) => {
-    const { item_name, item_description, price } = req.body;
+    const { item_name, item_description, price_restaurant_invoice, price_meal_item } = req.body;
     try {
         const connection = await mysql.createConnection(dbUrl);
-        await connection.query('INSERT INTO meal_items (item_name, item_description, price) VALUES (?, ?, ?)', [item_name, item_description, price]);
+        await connection.query('INSERT INTO meal_items (item_name, item_description, price_restaurant_invoice, price_meal_item) VALUES (?, ?, ?)', [item_name, item_description, price]);
         connection.end();
         res.send({ message: 'Meal item added successfully' });
     } catch (err) {
