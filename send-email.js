@@ -149,7 +149,7 @@ async function MonthOrderTotal() {
     try {
         const connection = await mysql.createConnection(dbUrl);
         const [data] = await connection.query(
-            `SELECT mi.item_name as plat, COUNT(*) as quantité, SUM(mi.price) as total_chf
+            `SELECT mi.item_name as plat, COUNT(*) as quantité, SUM(mi.price_restaurant_invoice) as total_chf
             FROM orders o
             INNER JOIN order_details od ON od.order_id = o.id
             INNER JOIN meal_items mi on od.meal_item_id = mi.id
@@ -159,7 +159,7 @@ async function MonthOrderTotal() {
             
             UNION
             
-            SELECT 'Total' as plat, COUNT(*) as quantité, SUM(mi.price) as total_chf
+            SELECT 'Total' as plat, COUNT(*) as quantité, SUM(mi.price_restaurant_invoice) as total_chf
             FROM orders o
             INNER JOIN order_details od ON od.order_id = o.id
             INNER JOIN meal_items mi on od.meal_item_id = mi.id
@@ -182,7 +182,7 @@ async function MonthOrderTotal() {
         try {
             const connection = await mysql.createConnection(dbUrl);
             const [data] = await connection.query(
-    `select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, u.user_name as name, mi.item_name as plat, count(*) as quantité, sum(mi.price) as total_chf from orders o
+    `select DATE_FORMAT(order_date, '%d-%m-%Y') AS date_commande, u.user_name as name, mi.item_name as plat, count(*) as quantité, sum(mi.price_restaurant_invoice) as total_chf from orders o
     inner join users u on o.cobot_member_id = u.cobot_id
     INNER JOIN order_details od ON od.order_id = o.id
     INNER JOIN meal_items mi on od.meal_item_id = mi.id
@@ -192,7 +192,7 @@ async function MonthOrderTotal() {
     
     UNION
     
-    SELECT 'Total', 'Total', 'Total' as plat, COUNT(*) as quantité, SUM(mi.price) as total_chf
+    SELECT 'Total', 'Total', 'Total' as plat, COUNT(*) as quantité, SUM(mi.price_restaurant_invoice) as total_chf
     FROM orders o
     INNER JOIN order_details od ON od.order_id = o.id
     INNER JOIN meal_items mi on od.meal_item_id = mi.id
@@ -229,7 +229,7 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
           path: csvPath[0]
         },
         {
-          filename: `${filename[1]}}${format}`,
+          filename: `${filename[1]}${format}`,
           path: csvPath[1]
         }]
     }, (error, info) => {
@@ -241,40 +241,73 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
     });
   }
   
+
+  function roundToTwo(num) {
+    return Math.round((num + Number.EPSILON) * 100) / 100;
+  }
+
+  
   async function createChargesForAllUsers() {
     try {
       const connection = await mysql.createConnection(dbUrl);
+      
       const [orders] = await connection.query(
-        `SELECT o.cobot_member_id, u.membership_id, mi.item_name, mi.price
+        `SELECT o.cobot_member_id, u.membership_id, mi.item_name, mi.price_meal_item, DATE_FORMAT(o.order_date, '%Y-%m-%d') as date 
         FROM orders o
         INNER JOIN order_details od ON od.order_id = o.id
         INNER JOIN meal_items mi ON mi.id = od.meal_item_id
         INNER JOIN users u ON u.cobot_id = o.cobot_member_id
-        WHERE o.order_date = CURRENT_DATE()`
-      );
+        WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+        AND YEAR(DATE(o.order_date)) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+        ;`)
       connection.end();
-  
-      for (const order of orders) {
-        await createChargeForUser(
-          order.price,
-          order.membership_id,
-          order.item_name
-        );
+      
+      const groupedOrders = orders.reduce((acc, order) => {
+        const { membership_id, ...rest } = order;
+        if (!acc[membership_id]) {
+          acc[membership_id] = [];
+        }
+        acc[membership_id].push(rest);
+        return acc;
+      }, {});
+      
+      for (const [membershipId, orders] of Object.entries(groupedOrders)) {
+        const items = orders.map(order => {
+          const priceWithoutTax = order.price_meal_item / (1 + (tax_rate / 100));
+          
+          const taxAmount = order.price_meal_item - priceWithoutTax;
+          return {
+            amount: roundToTwo(priceWithoutTax),
+            description: `${order.date} ${order.item_name}`,
+            quantity: 1,
+            tax_rate: tax_rate,
+            tax_amount: roundToTwo(taxAmount),
+            amount_with_tax: order.price_meal_item,
+            total_amount: roundToTwo(priceWithoutTax),
+            total_amount_with_tax:roundToTwo(order.price_meal_item)
+          };
+        });
+        console.log(items);
+        
+        await createInvoiceForUser(membershipId, items);
       }
     } catch (err) {
       console.error(err);
     }
   }
   
-  async function createChargeForUser(amount, membershipId, itemName) {
-    const url = `https://${subdomain}.cobot.me/api/memberships/${membershipId}/charges`;
-    const data = {
-      description: itemName,
-      amount: amount.toString(),
-      charged_at: currentDate,
-      tax_rate: tax_rate
-    };
   
+  
+  async function createInvoiceForUser(membershipId, items) {
+    const url = `https://${subdomain}.cobot.me/api/memberships/${membershipId}/invoices`;
+    const data = {
+      currency: "CHF",
+      invoice_text: "Facture pour les repas",
+      notes: "-",
+      created_at: new Date().toISOString().split('T')[0],
+      items,
+    };
+    
     try {
       const response = await axios.post(url, data, {
         headers: {
@@ -282,9 +315,9 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
         },
       });
   
-      console.log('Charge created:', response.data);
+      console.log('Invoice created:', response.data);
     } catch (err) {
-      console.error('Failed to create charge:', err);
+      console.error('Failed to create invoice:', err);
     }
   }
   
@@ -295,11 +328,12 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
     let csvPath_2 = await DayOrderDetails();
     let filename = [`${currentDate}_commande_du_jour${format}`, `${currentDate}_détail_commande_du_jour${format}`];
     sendEmail(htmlTable, [csvPath, csvPath_2], 'Commande du jour Workhub', filename);
-    if (moment().date() == 1) {
+    if (moment().date() == 30) {
         let { htmlTable, csvPath }  = await MonthOrderTotal();
         let csvPath_2 = await MonthOrderDetails();
         let filename = [`${currentDate}_commande_du_mois${format}`, `${currentDate}_détail_commande_du_mois${format}`];
         sendEmail(htmlTable, [csvPath, csvPath_2], 'Commande du mois Workhub', filename);
+        createChargesForAllUsers();
     }
-    createChargesForAllUsers();
+    
 })();

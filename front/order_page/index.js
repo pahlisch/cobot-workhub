@@ -99,7 +99,10 @@ function app() {
         confirmBasket() {
             let currentDate = new Date();
             let basketDate = new Date(this.date);
-            if (basketDate <= currentDate) {
+            let cutoffTime = new Date(this.date);
+            cutoffTime.setHours(9, 0, 0, 0); 
+        
+            if (basketDate < currentDate || (basketDate.toDateString() === currentDate.toDateString() && currentDate >= cutoffTime)){
 
                 this.modalMessage = "Les comandes du jour ont déjà été transmises au restaurant, vous ne pouvez plus les modifier ou passer de nouvelles commandes"
                 this.showModal = true;
