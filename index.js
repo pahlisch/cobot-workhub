@@ -389,7 +389,7 @@ app.put('/meal/display/:id', async (req, res) => {
     const { value } = req.body;
     try {
         const connection = await mysql.createConnection(dbUrl);
-        await connection.query('UPDATE meal_items SET value = ? WHERE id = ?', [value, id]);
+        await connection.query('UPDATE meal_items SET display = ? WHERE id = ?', [value, id]);
         connection.end();
         res.send({ message: 'Display value updated successfully' });
     } catch (err) {
