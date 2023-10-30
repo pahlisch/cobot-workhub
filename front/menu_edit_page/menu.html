@@ -23,8 +23,8 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
-            <template x-for="item in items" :key="item.id">
+        <tbody> 
+            <template x-for="item in items.sort((a, b) => a.display === b.display ? 0 : a.display ? -1 : 1)" :key="item.id" :class="{'hidden': !item.display}">
                 <tr>
                     <td x-text="item.item_name"></td>
                     <td x-text="item.item_description"></td>
@@ -33,6 +33,10 @@
                     <td>
                         <div class="actions">
                             <button @click="startEditing(item)">Modifier</button>
+                            <button @click="toggleDisplay(item)"> 
+                                <span x-show="!item.display">Afficher</span>
+                                <span x-show="item.display">Cacher</span>
+                            </button>
                             <button @click="deleteItem(item.id)">Effacer</button>
                         </div>
                     </td>

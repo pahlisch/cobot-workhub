@@ -2,7 +2,7 @@ function menuEditor() {
     return {
         route: "https://cobot-bot-workhub-b4b7ac000c0c.herokuapp.com",
         items: [],
-        currentItem: {},
+        currentItem: {},    
         api_token: 'YOUR_API_TOKEN',
         async fetchItems() {
             try {
@@ -48,6 +48,19 @@ function menuEditor() {
                 method: 'DELETE',
                 headers: {"Authorization": "Bearer " + this.api_token}
             });
+            await this.fetchItems();
+        },
+        async toggleDisplay(item) {
+            item.display = !item.display;
+            await fetch(this.route + `/meal/display/${item.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": "Bearer " + this.api_token
+                },
+                body: JSON.stringify({ display: item.display })
+            });
+        
             await this.fetchItems();
         },
         init() {

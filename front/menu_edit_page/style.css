@@ -71,4 +71,7 @@ table input[type="text"], table input[type="number"] {
     border-radius: 4px;
 }
 
+.hidden {
+    background-color: #f0f0f0;
+}
 

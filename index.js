@@ -383,3 +383,17 @@ app.post('/user/upsert', async function (req, res) {
         res.status(500).json({ message: 'Failed to upsert user' });
     }
 });
+
+app.put('/display/update/:id', async (req, res) => {
+    const { id } = req.params;
+    const { value } = req.body;
+    try {
+        const connection = await mysql.createConnection(dbUrl);
+        await connection.query('UPDATE display_values SET value = ? WHERE id = ?', [value, id]);
+        connection.end();
+        res.send({ message: 'Display value updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error updating display value');
+    }
+});
