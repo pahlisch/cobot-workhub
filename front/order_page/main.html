@@ -7,7 +7,7 @@
 <body>
     <div class="container" x-data="app({ showModal: false})" x-init="fetchItems()">
         <input type="date" placeholder="dd-mm-yyyy" x-model="date" x-on:change="loadOrder(date)" />
-        <h2>Date with orders</h2>
+        <h2>Vos Commandes</h2>
         <template x-for="(order, index) in future_orders" :key="index">
             <div class="menu-item">
                 <div class="menu-item-description">
@@ -19,7 +19,7 @@
                 </div>
             </div>
         </template>
-        <h2>Menu</h2>
+        <h2>Menu <a href="https://e2v.sv-restaurant.ch/fr/plan-des-menus/restaurant-mont-pelerin/" target="_blank">consulter le menu en ligne</a></h2>
         <template x-for="(item, index) in items" :key="index">
             <div class="menu-item">
                 <div class="menu-item-description">
@@ -28,29 +28,29 @@
                     <span x-text="item.item_description"></span>
                 </div>
                 <div class="menu-item-price">
-                    <span x-text="item.price + cur"></span>
+                    <span x-text="item.price_meal_item + cur"></span>
                 </div>
                 <div>
-                    <button @click="addToBasket(item)">Add</button>
+                    <button @click="addToBasket(item)">Ajouter</button>
                 </div>
             </div>
         </template>
-        <h2>Order for <span x-text=formatDate(date)></span></h2>
+        <h2>Commande pour le <span x-text=formatDate(date)></span></h2>
         <template x-for="(item, index) in basket" :key="index">
             <div class="basket-item">
                 <div class="menu-item-description">
                     <span x-text="item.item_name"></span>
                 </div>
                 <div class="basket-item-price">
-                    <span x-text="item.price + cur"></span>
+                    <span x-text="item.price_meal_item + cur"></span>
                 </div>
                 <div>
-                    <button @click="removeFromBasket(index)">Remove</button>
+                    <button @click="removeFromBasket(index)">Retirer</button>
                 </div>
             </div>
         </template>
         <div class="total">Total: <span x-text="returnTotalBasketAmount() + cur"></span></div>
-        <button class="confirm" @click="confirmBasket()">Confirm</button>
+        <button class="confirm" @click="confirmBasket()">Enregistrer</button>
         <div x-show="showModal" class="modal-bg">
             <div class="modal">
                 <h3> <span x-text="modalMessage"></span></h3>

@@ -101,7 +101,7 @@ function app() {
             let basketDate = new Date(this.date);
             if (basketDate <= currentDate) {
 
-                this.modalMessage = "You cannot modify today's order nor past order"
+                this.modalMessage = "Les comandes du jour ont déjà été transmises au restaurant, vous ne pouvez plus les modifier ou passer de nouvelles commandes"
                 this.showModal = true;
                 return
             }
@@ -123,14 +123,14 @@ function app() {
                 }
                 this.postRoute("/order/insert", post_data);
             }
-            this.modalMessage = "Your order has been saved"
+            this.modalMessage = "Votre commande a été enregistrée"
             this.showModal = true;
             
         },
         returnTotalBasketAmount() {
             let total = 0;
             for (let i=0; i < this.basket.length; i++){
-                total = total + this.basket[i].price;
+                total = total + this.basket[i].price_meal_item;
             }
             return total;
         },
