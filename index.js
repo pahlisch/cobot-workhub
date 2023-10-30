@@ -347,10 +347,10 @@ app.post('/meal/add', async (req, res) => {
 // Update a meal item
 app.put('/meal/update/:id', async (req, res) => {
     const { id } = req.params;
-    const { item_name, item_description, price } = req.body;
+    const { item_name, item_description,  price_restaurant_invoice, price_meal_item } = req.body;
     try {
         const connection = await mysql.createConnection(dbUrl);
-        await connection.query('UPDATE meal_items SET item_name = ?, item_description = ?, price = ? WHERE id = ?', [item_name, item_description, price, id]);
+        await connection.query('UPDATE meal_items SET item_name = ?, item_description = ?, price_restaurant_invoice = ?, price_meal_item = ? WHERE id = ?', [item_name, item_description, price_restaurant_invoice, price_meal_item, id]);
         connection.end();
         res.send({ message: 'Meal item updated successfully' });
     } catch (err) {

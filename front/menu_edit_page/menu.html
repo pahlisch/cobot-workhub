@@ -24,24 +24,23 @@
             </tr>
         </thead>
         <tbody> 
-            <template x-for="item in items.sort((a, b) => a.display === b.display ? 0 : a.display ? -1 : 1)" :key="item.id" :class="{'hidden': !item.display}">
-                <tr>
-                    <td x-text="item.item_name"></td>
-                    <td x-text="item.item_description"></td>
-                    <td x-text="item.price_restaurant_invoice"></td>
-                    <td x-text="item.price_meal_item"></td>
-                    <td>
-                        <div class="actions">
-                            <button @click="startEditing(item)">Modifier</button>
-                            <button @click="toggleDisplay(item)"> 
-                                <span x-show="!item.display">Afficher</span>
-                                <span x-show="item.display">Cacher</span>
-                            </button>
-                            <button @click="deleteItem(item.id)">Effacer</button>
-                        </div>
-                    </td>
-                    
-                </tr>
+            <template x-for="item in items.sort((a, b) => a.display === b.display ? 0 : a.display ? -1 : 1)" :key="item.id">
+<tr :class="{ 'greyed': !item.display }">
+        <td x-text="item.item_name"></td>
+        <td x-text="item.item_description"></td>
+        <td x-text="item.price_restaurant_invoice"></td>
+        <td x-text="item.price_meal_item"></td>
+        <td>
+            <div class="actions">
+                <button @click="startEditing(item)">Edit</button>
+                <button @click="toggleDisplay(item)"> 
+                    <span x-show="!item.display">Afficher</span>
+                    <span x-show="item.display">Cacher</span>
+                </button>
+                <button @click="deleteItem(item.id)">Effacer</button>
+            </div>
+        </td>
+    </tr>
             </template>
             <tr>
                 <td><input type="text" x-model="currentItem.item_name" placeholder="Nom"></td>

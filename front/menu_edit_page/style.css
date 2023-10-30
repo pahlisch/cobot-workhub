@@ -29,6 +29,8 @@ th, td {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 5px;
+    flex-wrap: nowrap;
 }
 
 button {
@@ -38,7 +40,6 @@ button {
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
-    margin-left: 5px;
 }
 
 button:hover {
@@ -60,18 +61,22 @@ input {
     margin-right: 10px;
 }
 
-/* ... your existing CSS ... */
 
-/* Style for the input fields inside the table */
 table input[type="text"], table input[type="number"] {
-    width: 100%;   /* This will make them take the full width of the table cell */
-    box-sizing: border-box; /* To ensure padding and border are included in the total width */
+    width: 100%;  
+    box-sizing: border-box; 
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-.hidden {
-    background-color: #f0f0f0;
+.greyed {
+    background-color: darkgrey;
+    color: lightgrey;
+}
+
+.greyed .actions button {
+    background-color: gray;
+    color: white;
 }
 
