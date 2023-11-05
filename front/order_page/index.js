@@ -9,8 +9,8 @@ function app() {
         basket: [],
         future_orders: [],
         cur: ' CHF',
-        space_name: 'wiz-cobot',
-        api_token: 'YOUR_API_TOKEN',
+        space_name: 'TheWorkHub',
+        api_token: 'CwXy@Ef*y@#2&2mZ964dfbFZ#gH%7aVbTWFvj',
         async fetchItems() {
             this.member_id = await this.upsertUserId();
             this.items = await this.getRoute('/meals');
@@ -22,10 +22,10 @@ function app() {
                 const response = await fetch(this.route + endRoute, {
                     method: "GET",
                     headers: {
-                      "Cache-Control": "no-cache",
-                      "Authorization": "Bearer " + this.api_token,
+                        "Cache-Control": "no-cache",
+                        "Authorization": "Bearer " + this.api_token,
                     },
-                  });
+                });
                 const data = await response.json();
                 return data;
             } catch (error) {
@@ -35,11 +35,11 @@ function app() {
         },
         async getCobot(endRoute) {
             try {
-                const response = await fetch(this.cobot_route + endRoute, 
+                const response = await fetch(this.cobot_route + endRoute,
                     {
                         method: "GET",
                         headers: {
-                          "Authorization": "Bearer " + window.cobot.access_token
+                            "Authorization": "Bearer " + window.cobot.access_token
                         },
                     });
                 const data = await response.json();
@@ -54,20 +54,20 @@ function app() {
             let userName = "name_not_found";
             let membershipId = "membership_not_found";
             try {
-                for (let i=0; i<data.memberships.length; i++) {
+                for (let i = 0; i < data.memberships.length; i++) {
                     if (data.memberships[i].space_name === this.space_name) {
                         userName = data.memberships[i].name;
                         membershipId = data.memberships[i].id;
                     }
                 }
-                
+
             } catch (error) {
                 throw error;
             }
 
-            this.postRoute("/user/upsert", {cobotId: data.id, userName: userName, membershipId: membershipId})
+            this.postRoute("/user/upsert", { cobotId: data.id, userName: userName, membershipId: membershipId })
             return data.id
-        }, 
+        },
         async postRoute(endRoute, postData) {
             try {
                 const response = await fetch(this.route + endRoute, {
@@ -78,10 +78,10 @@ function app() {
                     },
                     body: JSON.stringify(postData)
                 });
-        
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
-                } 
+                }
 
 
             } catch (error) {
@@ -98,25 +98,39 @@ function app() {
         },
         confirmBasket() {
             let currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+
+            let currentDateTime = new Date();
+
             let basketDate = new Date(this.date);
+            basketDate.setHours(0, 0, 0, 0);
             let cutoffTime = new Date(this.date);
-            cutoffTime.setHours(9, 0, 0, 0); 
-        
-            if (basketDate < currentDate || (basketDate.toDateString() === currentDate.toDateString() && currentDate >= cutoffTime)){
+            cutoffTime.setHours(9, 0, 0, 0);
+
+            let dayOfWeek = basketDate.getDay();
+
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                this.modalMessage = "Les commandes ne peuvent pas être confirmées les samedis et dimanches";
+                this.showModal = true;
+                return;
+            }
+
+            else if (basketDate < currentDate || (basketDate.getTime() === currentDate.getTime() && currentDateTime >= cutoffTime)) {
 
                 this.modalMessage = "Les comandes du jour ont déjà été transmises au restaurant, vous ne pouvez plus les modifier ou passer de nouvelles commandes"
+
                 this.showModal = true;
                 return
             }
-            
+
             let meal_ids = [];
-            
+
             if (this.basket.length === 0) {
 
                 this.getRoute(`/order/delete/${this.member_id}/${this.date}`);
             } else {
 
-                for (let i=0; i < this.basket.length; i++) {
+                for (let i = 0; i < this.basket.length; i++) {
                     meal_ids.push(this.basket[i].id)
                 }
                 let post_data = {
@@ -128,11 +142,11 @@ function app() {
             }
             this.modalMessage = "Votre commande a été enregistrée"
             this.showModal = true;
-            
+
         },
         returnTotalBasketAmount() {
             let total = 0;
-            for (let i=0; i < this.basket.length; i++){
+            for (let i = 0; i < this.basket.length; i++) {
                 total = total + this.basket[i].price_meal_item;
             }
             return total;
@@ -143,15 +157,15 @@ function app() {
             this.dateOrder = await this.getRoute(`/orderDetails/${this.member_id}/${date}`);
 
             if (this.dateOrder.length !== 0) {
-                for (let i = 0; i < this.dateOrder.length; i++) { 
+                for (let i = 0; i < this.dateOrder.length; i++) {
                     this.basket.push(this.dateOrder[i]);
                 }
             }
-            this.future_orders = await this.getRoute(`/orders/${this.member_id}`);    
+            this.future_orders = await this.getRoute(`/orders/${this.member_id}`);
         },
         formatDate(datetimeString) {
             return datetimeString.split('T')[0];
         },
-        
+
     }
 }

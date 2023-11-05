@@ -44,6 +44,7 @@ const smtpTransport = nodemailer.createTransport({
   }
 });
 
+
 async function getMealItems() {
     try {
 
@@ -174,8 +175,22 @@ async function insertOrder(req) {
     }
 }
 
+
 async function deleteOrderByMemberAndDate(member_id, date) {
 
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    let currentDateTime = new Date();
+
+    let basketDate = new Date(date);
+    basketDate.setHours(0, 0, 0, 0);
+    let cutoffTime = new Date(date);
+    cutoffTime.setHours(9, 0, 0, 0);
+
+    if (basketDate < currentDate || (basketDate.getTime() === currentDate.getTime() && currentDateTime >= cutoffTime)) {
+        throw new Error("La commande ne peut pas être confirmée après l'heure limite ou dans le passé.");
+    }
 
 
     let deleteOrderDetail = `DELETE od FROM order_details od INNER JOIN orders o ON od.order_id = o.id WHERE o.cobot_member_id = ? AND o.order_date = ?`;
