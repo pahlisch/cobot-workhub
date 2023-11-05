@@ -192,8 +192,10 @@ async function deleteOrderByMemberAndDate(member_id, date) {
     console.log(currentDateTime);
     console.log(currentDate);
     console.log(basketDate);
+    console.log(date);
+    console.log(typeof date);
 
-    date = date.toJSON().slice(0, 10);
+    date = date.slice(0, 10);
 
     if (basketDate < currentDate || (basketDate.getTime() === currentDate.getTime() && currentDateTime >= cutoffTime)) {
         throw new Error("La commande ne peut pas être confirmée après l'heure limite ou dans le passé.");
