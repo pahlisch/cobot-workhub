@@ -32,7 +32,7 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-const dbUrl = process.env.CLEARDB_DATABASE_URL;
+const dbUrl = process.env.JAWSDB_URL;
 
 const smtpTransport = nodemailer.createTransport({
   host: process.env.MAILGUN_SMTP_SERVER,
@@ -202,10 +202,8 @@ async function deleteOrderByMemberAndDate(member_id, date) {
     let deleteOrder = `DELETE FROM orders WHERE cobot_member_id = ? AND order_date = ?`;
 
     try {
+
         const connection = await mysql.createConnection(dbUrl);
-
-
-
         let resultOrderDetail = await connection.query(deleteOrderDetail, [member_id, date]);
         let resultOrder = await connection.query(deleteOrder, [member_id, date]);
 
