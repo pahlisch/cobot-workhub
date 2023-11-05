@@ -189,7 +189,7 @@ async function deleteOrderByMemberAndDate(member_id, date) {
         basketDate.setHours(0, 0, 0, 0);
         let cutoffTime = new Date(date);
         cutoffTime.setHours(9, 0, 0, 0);
-        date = date-slice(0, 10);
+        date = date.slice(0, 10);
     
 
         if (basketDate < currentDate || (basketDate.getTime() === currentDate.getTime() && currentDateTime >= cutoffTime)) {
