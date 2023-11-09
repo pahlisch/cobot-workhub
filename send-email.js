@@ -32,8 +32,7 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-
-const dbUrl = process.env.CLEARDB_DATABASE_URL;
+const dbUrl = process.env.CLEARDB_GREEN_URL;
 
 const smtpTransport = nodemailer.createTransport({
   host: process.env.MAILGUN_SMTP_SERVER,
