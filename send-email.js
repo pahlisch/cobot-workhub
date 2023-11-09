@@ -327,7 +327,7 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
     let csvPath_2 = await DayOrderDetails();
     let filename = [`${currentDate}_commande_du_jour${format}`, `${currentDate}_détail_commande_du_jour${format}`];
     sendEmail(htmlTable, [csvPath, csvPath_2], 'Commande du jour Workhub', filename);
-    if (moment().date() == 30) {
+    if (moment().date() == 1) {
         let { htmlTable, csvPath }  = await MonthOrderTotal();
         let csvPath_2 = await MonthOrderDetails();
         let filename = [`${currentDate}_commande_du_mois${format}`, `${currentDate}_détail_commande_du_mois${format}`];
