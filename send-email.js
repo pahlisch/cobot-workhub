@@ -108,7 +108,7 @@ async function DayOrderTotal() {
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
-group by mi.item_name ;`);
+group by plat, date_commande ;`);
         connection.end();
 
         const htmlTable = generateHTMLTable(data);
@@ -131,7 +131,7 @@ inner join users u on o.cobot_member_id = u.cobot_id
 inner join order_details od on od.order_id = o.id 
 inner join meal_items mi on mi.id = od.meal_item_id 
 where o.order_date  = current_date()
-group by o.cobot_member_id, mi.item_name, u.user_name ;`);
+group by o.cobot_member_id, mi.item_name, u.user_name, date_commande ;`);
         connection.end();
 
         const csvPath = generateCSV(data, "détail_commande");
@@ -187,7 +187,7 @@ async function MonthOrderTotal() {
     INNER JOIN meal_items mi on od.meal_item_id = mi.id
     WHERE MONTH(DATE(o.order_date)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
     AND YEAR(DATE(o.order_date)) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 DAY))
-    group by u.user_name, mi.item_name, o.cobot_member_id
+    group by u.user_name, mi.item_name, o.cobot_member_id, date_commande
     
     UNION
     

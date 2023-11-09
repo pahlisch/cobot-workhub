@@ -193,7 +193,7 @@ async function deleteOrderByMemberAndDate(member_id, date) {
     
 
         if (basketDate < currentDate || (basketDate.getTime() === currentDate.getTime() && currentDateTime >= cutoffTime)) {
-            return { messageOrderDetail: "La commande ne peut pas être confirmée après l'heure limite ou dans le passé.", messageOrder: "La commande ne peut pas être confirmée après l'heure limite ou dans le passé."};
+            return { messageOrderDetail: "La commande ne peut pas être confirmée après l'heure limite ou dans le passé.", messageOrder: "La commande ne peut pas être confirmée après l'heure limite ou dans le passé." };
         }
 
         let deleteOrderDetail = `DELETE od FROM order_details od INNER JOIN orders o ON od.order_id = o.id WHERE o.cobot_member_id = ? AND o.order_date = ?`;
