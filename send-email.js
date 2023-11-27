@@ -16,7 +16,7 @@ dotenv.config({ path: envPath });
 
 const currentDate = moment().format('YYYY-MM-DD');
 const subdomain = process.env.SUB_DOMAIN
-const format = '.xlsx'
+const format = '.csv'
 const tax_rate = process.env.TAX_RATE
 
 // Initialize the express app
@@ -224,11 +224,11 @@ const sendEmail = async (order_table, csvPath, subject, filename) => {
       text: 'workhub order data',
       html: order_table,
       attachments: [{
-          filename: `${filename[0]}${format}`,
+          filename: `${filename[0]}`,
           path: csvPath[0]
         },
         {
-          filename: `${filename[1]}${format}`,
+          filename: `${filename[1]}`,
           path: csvPath[1]
         }]
     }, (error, info) => {
