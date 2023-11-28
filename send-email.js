@@ -86,9 +86,9 @@ function generateCSV(data, filename) {
     // Generate CSV rows
     data.forEach(row => {
         const values = Object.values(row).map(value => 
-            typeof value === 'string' && value.includes(';') ? `"${value}"` : value
+            typeof value === 'string' && value.includes(',') ? `"${value}"` : value
         );
-        csv += values.join(';') + '\n';
+        csv += values.join(',') + '\n';
     });
 
     // Write CSV to file
