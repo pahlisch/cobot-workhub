@@ -93,7 +93,7 @@ function generateCSV(data, filename) {
 
     // Write CSV to file
     const path = `./orders/${filename}${format}`;
-    fs.writeFileSync(path, csv);
+    fs.writeFileSync(path, csv, 'utf8');
 
     return path;
 }
